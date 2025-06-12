@@ -20,17 +20,19 @@ import {
 import { OpenAIStreamOptions } from './openai';
 
 const transformOpenAIStream = (
-  chunk: OpenAI.Responses.ResponseStreamEvent | {
-    annotation: {
-      end_index: number;
-      start_index: number;
-      title: string;
-      type: 'url_citation';
-      url: string;
-    };
-    item_id: string;
-    type: 'response.output_text.annotation.added';
-  },
+  chunk:
+    | OpenAI.Responses.ResponseStreamEvent
+    | {
+        annotation: {
+          end_index: number;
+          start_index: number;
+          title: string;
+          type: 'url_citation';
+          url: string;
+        };
+        item_id: string;
+        type: 'response.output_text.annotation.added';
+      },
   streamContext: StreamContext,
 ): StreamProtocolChunk | StreamProtocolChunk[] => {
   // handle the first chunk error
@@ -81,6 +83,19 @@ const transformOpenAIStream = (
               type: 'tool_calls',
             } satisfies StreamProtocolToolCallChunk;
           }
+
+          case 'image_generation_call': {
+            // Handle completed image generation
+            if (chunk.item.result) {
+              const imageData = `data:image/png;base64,${chunk.item.result}`;
+              return {
+                data: imageData,
+                id: chunk.item.id,
+                type: 'base64_image',
+              };
+            }
+            break;
+          }
         }
 
         return { data: chunk.item, id: streamContext.id, type: 'data' };
@@ -117,6 +132,19 @@ const transformOpenAIStream = (
         return { data: chunk.delta, id: chunk.item_id, type: 'reasoning' };
       }
 
+      case 'response.image_generation_call.partial_image': {
+        // Handle streaming partial images
+        if (chunk.partial_image_b64) {
+          const imageData = `data:image/png;base64,${chunk.partial_image_b64}`;
+          return {
+            data: imageData,
+            id: `${chunk.item_id}_partial_${chunk.partial_image_index}`,
+            type: 'base64_image',
+          };
+        }
+        break;
+      }
+
       case 'response.output_text.annotation.added': {
         const citations = chunk.annotation;
 
@@ -136,7 +164,7 @@ const transformOpenAIStream = (
             data: { citations: streamContext.returnedCitationArray },
             id: chunk.item.id,
             type: 'grounding',
-          }
+          };
         }
 
         return { data: null, id: chunk.item.id, type: 'text' };

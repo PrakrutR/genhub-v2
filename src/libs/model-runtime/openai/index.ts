@@ -1,8 +1,10 @@
+import { responsesAPIModels } from '@/const/models';
+import { aiModelSelectors, getAiInfraStoreState } from '@/store/aiInfra';
+
 import { ChatStreamPayload, ModelProvider } from '../types';
 import { processMultiProviderModelList } from '../utils/modelParse';
 import { createOpenAICompatibleRuntime } from '../utils/openaiCompatibleFactory';
 import { pruneReasoningPayload } from '../utils/openaiHelpers';
-import { responsesAPIModels } from '@/const/models';
 
 export interface OpenAIModelCard {
   id: string;
@@ -60,19 +62,42 @@ export const LobeOpenAI = createOpenAICompatibleRuntime({
   provider: ModelProvider.OpenAI,
   responses: {
     handlePayload: (payload) => {
-      const { enabledSearch, model, tools, ...rest } = payload;
+      const { enabledSearch, model, tools, provider, ...rest } = payload;
 
-      const openaiTools = enabledSearch
-        ? [
-            ...(tools || []),
-            {
-              type: 'web_search_preview',
-              ...(oaiSearchContextSize && {
-                search_context_size: oaiSearchContextSize,
-              }),
-            },
-          ]
-        : tools;
+      // Check if model supports image output
+      const supportsImageOutput = aiModelSelectors.isModelSupportImageOutput(
+        model,
+        provider || ModelProvider.OpenAI,
+      )(getAiInfraStoreState());
+
+      let openaiTools = tools || [];
+
+      // Add web search tool if enabled
+      if (enabledSearch) {
+        openaiTools = [
+          ...openaiTools,
+          {
+            type: 'web_search_preview',
+            ...(oaiSearchContextSize && {
+              search_context_size: oaiSearchContextSize,
+            }),
+          },
+        ];
+      }
+
+      // Add image generation tool if model supports it
+      if (supportsImageOutput) {
+        openaiTools = [
+          ...openaiTools,
+          {
+            type: 'image_generation',
+            // Optional configuration for image generation can be added here
+            // size: 'auto',
+            // quality: 'auto',
+            // background: 'auto'
+          },
+        ];
+      }
 
       if (prunePrefixes.some((prefix) => model.startsWith(prefix))) {
         if (!payload.reasoning) {
