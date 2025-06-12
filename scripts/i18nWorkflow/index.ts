@@ -3,9 +3,9 @@ import { genDiff } from './genDiff';
 import { split } from './utils';
 
 split('DIFF ANALYSIS');
-genDiff();
+await genDiff();
 
 split('GENERATE DEFAULT LOCALE');
-genDefaultLocale();
+await genDefaultLocale();
 
 split('GENERATE I18N FILES');

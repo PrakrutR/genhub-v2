@@ -15,6 +15,7 @@ import {
   ChatCompletionErrorPayload,
   ModelProvider,
 } from '@/libs/model-runtime';
+import type { ChatStreamPayload } from '@/libs/model-runtime/types';
 import { filesPrompts } from '@/prompts/files';
 import { BuiltinSystemRolePrompts } from '@/prompts/systemRole';
 import { getAgentStoreState } from '@/store/agent';
@@ -36,7 +37,7 @@ import { WebBrowsingManifest } from '@/tools/web-browsing';
 import { WorkingModel } from '@/types/agent';
 import { ChatErrorType } from '@/types/fetch';
 import { ChatMessage, MessageToolCall } from '@/types/message';
-import type { ChatStreamPayload, OpenAIChatMessage } from '@/types/openai/chat';
+import type { OpenAIChatMessage } from '@/types/openai/chat';
 import { UserMessageContentPart } from '@/types/openai/chat';
 import { parsePlaceholderVariablesMessages } from '@/utils/client/parserPlaceholder';
 import { createErrorResponse } from '@/utils/errorResponse';
@@ -107,6 +108,7 @@ interface FetchOptions extends FetchSSEOptions {
 
 interface GetChatCompletionPayload extends Partial<Omit<ChatStreamPayload, 'messages'>> {
   messages: ChatMessage[];
+  plugins?: string[];
 }
 
 interface FetchAITaskResultParams extends FetchSSEOptions {
@@ -265,10 +267,17 @@ class ChatService {
       }
     }
 
+    // ============  5. check image generation support   ============ //
+    const isModelHasImageOutput = aiModelSelectors.isModelSupportImageOutput(
+      payload.model,
+      payload.provider!,
+    )(aiInfraStoreState);
+
     return this.getChatCompletion(
       {
         ...params,
         ...extendParams,
+        enabledImageGeneration: isModelHasImageOutput,
         enabledSearch: enabledSearch && useModelSearch ? true : undefined,
         messages: oaiMessages,
         tools,
@@ -321,16 +330,16 @@ class ChatService {
       model = findDeploymentName(model, provider);
     }
 
-    const apiMode = aiProviderSelectors.isProviderEnableResponseApi(provider)(
-      getAiInfraStoreState(),
-    )
+    const apiMode: 'responses' | undefined = aiProviderSelectors.isProviderEnableResponseApi(
+      provider,
+    )(getAiInfraStoreState())
       ? 'responses'
       : undefined;
 
     const payload = merge(
       { model: DEFAULT_AGENT_CONFIG.model, stream: true, ...DEFAULT_AGENT_CONFIG.params },
       { ...res, apiMode, model },
-    );
+    ) as Partial<ChatStreamPayload>;
 
     /**
      * Use browser agent runtime
@@ -464,21 +473,20 @@ class ChatService {
     onLoadingChange?.(true);
 
     try {
+      const { plugins, ...restParams } = params;
       const oaiMessages = this.processMessages({
         messages: params.messages as any,
         model: params.model!,
         provider: params.provider!,
-        tools: params.plugins,
+        tools: plugins,
       });
-      const tools = this.prepareTools(params.plugins || [], {
+      const tools = this.prepareTools(plugins || [], {
         model: params.model!,
         provider: params.provider!,
       });
 
-      // remove plugins
-      delete params.plugins;
       await this.getChatCompletion(
-        { ...params, messages: oaiMessages, tools },
+        { ...restParams, messages: oaiMessages, tools },
         {
           onErrorHandle: (error) => {
             errorHandle(new Error(error.message), error);

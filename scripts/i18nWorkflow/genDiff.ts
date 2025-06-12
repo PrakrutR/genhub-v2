@@ -12,7 +12,7 @@ import {
 } from './const';
 import { readJSON, tagWhite, writeJSONWithPrettier } from './utils';
 
-export const genDiff = () => {
+export const genDiff = async () => {
   consola.start(`Remove diff analysis...`);
 
   const resources = require(srcDefaultLocales);
@@ -40,7 +40,7 @@ export const genDiff = () => {
         unset(localeJSON, item.path);
       }
 
-      writeJSONWithPrettier(localeFilepath, localeJSON);
+      await writeJSONWithPrettier(localeFilepath, localeJSON);
       clearLocals.push(locale);
     }
     consola.info('clear', clearLocals);

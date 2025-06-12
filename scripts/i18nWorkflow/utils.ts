@@ -2,12 +2,11 @@ import { consola } from 'consola';
 import { colors } from 'consola/utils';
 import { readFileSync, writeFileSync } from 'node:fs';
 import { resolve } from 'node:path';
-import prettier from "@prettier/sync";
+import * as prettier from 'prettier';
+
 import i18nConfig from '../../.i18nrc';
 
-let prettierOptions = prettier.resolveConfig(
-  resolve(__dirname, '../../.prettierrc.js')
-);
+const prettierConfigPath = resolve(__dirname, '../../.prettierrc.js');
 
 export const readJSON = (filePath: string) => {
   const data = readFileSync(filePath, 'utf8');
@@ -19,10 +18,11 @@ export const writeJSON = (filePath: string, data: any) => {
   writeFileSync(filePath, jsonStr, 'utf8');
 };
 
-export const writeJSONWithPrettier = (filePath: string, data: any) => {
+export const writeJSONWithPrettier = async (filePath: string, data: any) => {
   const jsonStr = JSON.stringify(data, null, 2);
-  const formatted = prettier.format(jsonStr, {
-    ...prettierOptions,
+  const config = (await prettier.resolveConfig(prettierConfigPath)) || {};
+  const formatted = await prettier.format(jsonStr, {
+    ...config,
     parser: 'json',
   });
   writeFileSync(filePath, formatted, 'utf8');

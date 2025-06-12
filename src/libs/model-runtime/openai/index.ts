@@ -1,7 +1,6 @@
 import { responsesAPIModels } from '@/const/models';
-import { aiModelSelectors, getAiInfraStoreState } from '@/store/aiInfra';
 
-import { ChatStreamPayload, ModelProvider } from '../types';
+import { ChatCompletionTool, ChatStreamPayload, ModelProvider, OpenAIResponseTool } from '../types';
 import { processMultiProviderModelList } from '../utils/modelParse';
 import { createOpenAICompatibleRuntime } from '../utils/openaiCompatibleFactory';
 import { pruneReasoningPayload } from '../utils/openaiHelpers';
@@ -18,10 +17,16 @@ export const LobeOpenAI = createOpenAICompatibleRuntime({
   baseURL: 'https://api.openai.com/v1',
   chatCompletion: {
     handlePayload: (payload) => {
-      const { enabledSearch, model, ...rest } = payload;
+      const { enabledSearch, enabledImageGeneration, model, ...rest } = payload;
 
-      if (responsesAPIModels.has(model) || enabledSearch) {
-        return { ...rest, apiMode: 'responses', enabledSearch, model } as ChatStreamPayload;
+      if (responsesAPIModels.has(model) || enabledSearch || enabledImageGeneration) {
+        return {
+          ...rest,
+          apiMode: 'responses',
+          enabledImageGeneration,
+          enabledSearch,
+          model,
+        } as ChatStreamPayload;
       }
 
       if (prunePrefixes.some((prefix) => model.startsWith(prefix))) {
@@ -62,15 +67,9 @@ export const LobeOpenAI = createOpenAICompatibleRuntime({
   provider: ModelProvider.OpenAI,
   responses: {
     handlePayload: (payload) => {
-      const { enabledSearch, model, tools, provider, ...rest } = payload;
+      const { enabledSearch, model, tools, enabledImageGeneration, ...rest } = payload;
 
-      // Check if model supports image output
-      const supportsImageOutput = aiModelSelectors.isModelSupportImageOutput(
-        model,
-        provider || ModelProvider.OpenAI,
-      )(getAiInfraStoreState());
-
-      let openaiTools = tools || [];
+      let openaiTools: (ChatCompletionTool | OpenAIResponseTool)[] = tools || [];
 
       // Add web search tool if enabled
       if (enabledSearch) {
@@ -81,12 +80,12 @@ export const LobeOpenAI = createOpenAICompatibleRuntime({
             ...(oaiSearchContextSize && {
               search_context_size: oaiSearchContextSize,
             }),
-          },
+          } as OpenAIResponseTool,
         ];
       }
 
-      // Add image generation tool if model supports it
-      if (supportsImageOutput) {
+      // Add image generation tool if enabled (passed from higher level)
+      if (enabledImageGeneration) {
         openaiTools = [
           ...openaiTools,
           {
@@ -95,7 +94,7 @@ export const LobeOpenAI = createOpenAICompatibleRuntime({
             // size: 'auto',
             // quality: 'auto',
             // background: 'auto'
-          },
+          } as OpenAIResponseTool,
         ];
       }
 

@@ -4,7 +4,7 @@ import { colors } from 'consola/utils';
 import { entryLocaleJsonFilepath, i18nConfig, srcDefaultLocales } from './const';
 import { tagWhite, writeJSONWithPrettier } from './utils';
 
-export const genDefaultLocale = () => {
+export const genDefaultLocale = async () => {
   consola.info(`Default locale is ${i18nConfig.entryLocale}...`);
 
   const resources = require(srcDefaultLocales);
@@ -13,7 +13,7 @@ export const genDefaultLocale = () => {
 
   for (const [ns, value] of data) {
     const filepath = entryLocaleJsonFilepath(`${ns}.json`);
-    writeJSONWithPrettier(filepath, value);
+    await writeJSONWithPrettier(filepath, value);
     consola.success(tagWhite(ns), colors.gray(filepath));
   }
 };

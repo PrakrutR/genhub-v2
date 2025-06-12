@@ -94,7 +94,7 @@ const transformOpenAIStream = (
                 type: 'base64_image',
               };
             }
-            break;
+            return { data: chunk.item, id: streamContext.id, type: 'data' };
           }
         }
 
@@ -142,7 +142,7 @@ const transformOpenAIStream = (
             type: 'base64_image',
           };
         }
-        break;
+        return { data: chunk, id: streamContext.id, type: 'data' };
       }
 
       case 'response.output_text.annotation.added': {

@@ -73,6 +73,10 @@ export interface ChatStreamPayload {
    */
   enabledContextCaching?: boolean;
   /**
+   * 是否开启图像生成
+   */
+  enabledImageGeneration?: boolean;
+  /**
    * 是否开启搜索
    */
   enabledSearch?: boolean;
@@ -97,6 +101,10 @@ export interface ChatStreamPayload {
    * @title 返回的文本数量
    */
   n?: number;
+  /**
+   * @title 插件列表（为了兼容性保留）
+   */
+  plugins?: string[];
   /**
    * @title 控制生成文本中的惩罚系数，用于减少主题的变化
    * @default 0
@@ -183,6 +191,12 @@ export interface ChatCompletionTool {
    * The type of the tool. Currently, only `function` is supported.
    */
   type: 'function';
+}
+
+export interface OpenAIResponseTool {
+  [key: string]: any;
+  search_context_size?: string;
+  type: 'web_search_preview' | 'image_generation' | 'code_interpreter' | 'file_search';
 }
 
 interface OnFinishData {
