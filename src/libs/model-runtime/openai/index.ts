@@ -89,18 +89,13 @@ export const LobeOpenAI = createOpenAICompatibleRuntime({
         openaiTools = [
           ...openaiTools,
           {
-            
-background: 'auto',
-            
+            background: 'auto',
             // Configure for streaming support - partial_images must be 1-3 for streaming
-partial_images: 2,
-            
+            partial_images: 2,
             quality: 'auto',
-            
-// Let the model automatically decide the best options
-size: 'auto',
-            
-type: 'image_generation',
+            // Let the model automatically decide the best options
+            size: 'auto',
+            type: 'image_generation',
           } as OpenAIResponseTool,
         ];
       }
