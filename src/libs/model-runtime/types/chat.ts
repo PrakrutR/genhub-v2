@@ -195,7 +195,18 @@ export interface ChatCompletionTool {
 
 export interface OpenAIResponseTool {
   [key: string]: any;
+  // 0-100% for JPEG and WebP
+  background?: 'transparent' | 'opaque' | 'auto';
+  // File output format
+  compression?: number; 
+  format?: string;
+  partial_images?: number; 
+  // e.g., "1024x1024", "1024x1536", "auto"
+  quality?: 'low' | 'medium' | 'high' | 'auto'; 
+  // Web search tool properties
   search_context_size?: string;
+  // Image generation tool properties (based on OpenAI API docs)
+  size?: string; // 1-3 for streaming support
   type: 'web_search_preview' | 'image_generation' | 'code_interpreter' | 'file_search';
 }
 
