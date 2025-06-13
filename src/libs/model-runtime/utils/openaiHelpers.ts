@@ -101,6 +101,10 @@ export const convertOpenAIResponseInputs = async (
 };
 
 export const pruneReasoningPayload = (payload: ChatStreamPayload) => {
+  // Check if image generation is enabled - if so, we must maintain streaming
+  // because partial_images requires streaming to be enabled
+  const shouldForceStreaming = payload.enabledImageGeneration;
+
   return {
     ...payload,
     frequency_penalty: 0,
@@ -114,7 +118,9 @@ export const pruneReasoningPayload = (payload: ChatStreamPayload) => {
           : message.role,
     })),
     presence_penalty: 0,
-    stream: !disableStreamModels.has(payload.model),
+    // If image generation is enabled, keep streaming on regardless of model restrictions
+    // Otherwise, respect the disableStreamModels configuration
+    stream: shouldForceStreaming ? true : !disableStreamModels.has(payload.model),
     temperature: 1,
     top_p: 1,
   };

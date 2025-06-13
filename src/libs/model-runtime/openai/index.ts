@@ -98,6 +98,14 @@ export const LobeOpenAI = createOpenAICompatibleRuntime({
           imageGenTool.partial_images = 2;
         }
 
+        // Debug logging to see what's being sent
+        console.log('🔍 Image Generation Tool Debug:', {
+          enabledImageGeneration,
+          imageGenTool,
+          streamFlag: payload.stream,
+          willIncludePartialImages: payload.stream !== false,
+        });
+
         openaiTools = [...openaiTools, imageGenTool];
       }
 
@@ -116,7 +124,20 @@ export const LobeOpenAI = createOpenAICompatibleRuntime({
         return pruneReasoningPayload(payload) as any;
       }
 
-      return { ...rest, model, stream: payload.stream ?? true, tools: openaiTools } as any;
+      const finalPayload = { ...rest, model, stream: payload.stream ?? true, tools: openaiTools };
+
+      // Debug logging for final payload
+      console.log('🚀 Final OpenAI Payload Debug:', {
+        hasImageGeneration: enabledImageGeneration,
+        imageGenTool: openaiTools.find((tool) => tool.type === 'image_generation'),
+        model,
+        originalStream: payload.stream,
+        stream: finalPayload.stream,
+        toolsCount: openaiTools.length,
+        willUsePruneReasoning: prunePrefixes.some((prefix) => model.startsWith(prefix)),
+      });
+
+      return finalPayload as any;
     },
   },
 });
