@@ -86,18 +86,19 @@ export const LobeOpenAI = createOpenAICompatibleRuntime({
 
       // Add image generation tool if enabled (passed from higher level)
       if (enabledImageGeneration) {
-        openaiTools = [
-          ...openaiTools,
-          {
-            background: 'auto',
-            // Configure for streaming support - partial_images must be 1-3 for streaming
-            partial_images: 2,
-            quality: 'auto',
-            // Let the model automatically decide the best options
-            size: 'auto',
-            type: 'image_generation',
-          } as OpenAIResponseTool,
-        ];
+        const imageGenTool: OpenAIResponseTool = {
+          background: 'auto',
+          quality: 'auto',
+          size: 'auto',
+          type: 'image_generation',
+        };
+
+        // Only add partial_images when streaming is enabled
+        if (payload.stream !== false) {
+          imageGenTool.partial_images = 2;
+        }
+
+        openaiTools = [...openaiTools, imageGenTool];
       }
 
       if (prunePrefixes.some((prefix) => model.startsWith(prefix))) {
