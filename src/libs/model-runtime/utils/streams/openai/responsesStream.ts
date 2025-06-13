@@ -138,7 +138,8 @@ const transformOpenAIStream = (
           const imageData = `data:image/png;base64,${chunk.partial_image_b64}`;
           return {
             data: imageData,
-            id: `${chunk.item_id}_partial_${chunk.partial_image_index}`,
+            // Use the same ID as the final image to enable replacement
+            id: chunk.item_id,
             type: 'base64_image',
           };
         }

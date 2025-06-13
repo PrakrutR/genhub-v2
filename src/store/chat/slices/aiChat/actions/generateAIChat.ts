@@ -584,10 +584,35 @@ export const generateAIChat: StateCreator<
             // 等待所有上传任务完成
             const uploadResults = await Promise.all(uploadTasks.values());
 
-            // 使用上传后的 S3 URL 替换原始图像数据
-            finalImages = uploadResults.filter((i) => !!i.url) as ChatImageItem[];
+            // 使用上传后的 S3 URL 替换原始图像数据，保持原有的图像 ID 和顺序
+            const currentMessage = chatSelectors.getMessageById(messageId)(get());
+            const currentImages = currentMessage?.imageList || [];
+
+            // Create a map of upload results by original image ID
+            const uploadMap = new Map(uploadResults.map((result) => [(result as any).id, result]));
+
+            // Update images preserving order and handling upload failures gracefully
+            finalImages = currentImages
+              .map((currentImage) => {
+                const uploadResult = uploadMap.get(currentImage.id);
+                if (uploadResult && uploadResult.url && (uploadResult as any).uploadedId) {
+                  // Successfully uploaded - use S3 URL
+                  return {
+                    id: currentImage.id,
+                    url: uploadResult.url,
+                    alt: (uploadResult as any).alt || currentImage.alt,
+                  };
+                } else {
+                  // Upload failed or still in progress - keep base64 URL
+                  return currentImage;
+                }
+              })
+              .filter((img) => !!img.url);
           } catch (error) {
             console.error('Error waiting for image uploads:', error);
+            // On error, keep existing images from current message
+            const currentMessage = chatSelectors.getMessageById(messageId)(get());
+            finalImages = currentMessage?.imageList || [];
           }
         }
 
@@ -650,10 +675,21 @@ export const generateAIChat: StateCreator<
             const task = getFileStoreState()
               .uploadBase64FileWithProgress(image.data)
               .then((value) => ({
-                id: value?.id,
+                id: image.id, // Keep the original image ID for replacement mapping
+                uploadedId: value?.id,
                 url: value?.url,
-                alt: value?.filename || value?.id,
-              }));
+                alt: (value as any)?.filename || value?.id || image.id,
+              }))
+              .catch((error) => {
+                console.error('Failed to upload image:', error);
+                // Return original data as fallback
+                return {
+                  id: image.id,
+                  uploadedId: undefined,
+                  url: image.data, // Keep base64 as fallback
+                  alt: image.id,
+                };
+              });
 
             uploadTasks.set(image.id, task);
 

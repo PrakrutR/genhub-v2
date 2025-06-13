@@ -490,13 +490,6 @@ export const createOpenAICompatibleRuntime = <T extends Record<string, any> = an
         this.convertChatCompletionToolToResponseTool(tool),
       );
 
-      // Debug logging for Response API tools
-      console.log('🔧 Response API Tools Debug:', {
-        convertedTools,
-        hasImageGeneration: convertedTools?.some((t) => t.type === 'image_generation'),
-        originalTools: tools,
-      });
-
       const postPayload = {
         ...res,
         ...(reasoning_effort ? { reasoning: { effort: reasoning_effort } } : {}),
