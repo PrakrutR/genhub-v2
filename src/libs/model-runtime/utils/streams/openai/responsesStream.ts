@@ -85,18 +85,8 @@ const transformOpenAIStream = (
           }
 
           case 'image_generation_call': {
-            // Handle completed image generation
-            console.log('🖼️ Final image generation event:', chunk.item);
-            if (chunk.item.result) {
-              const imageData = `data:image/png;base64,${chunk.item.result}`;
-              console.log('✅ Returning final image data');
-              return {
-                data: imageData,
-                id: chunk.item.id,
-                type: 'base64_image',
-              };
-            }
-            console.log('❌ No result in image generation event');
+            // This handles the initial image generation call (status: 'in_progress')
+            // The completed image will be handled in 'response.output_item.done'
             return { data: chunk.item, id: streamContext.id, type: 'data' };
           }
         }
@@ -137,7 +127,6 @@ const transformOpenAIStream = (
 
       case 'response.image_generation_call.partial_image': {
         // Skip partial images - only show the final image
-        console.log('⏭️ Skipping partial image:', chunk.partial_image_index);
         return { data: null, id: streamContext.id, type: 'data' };
       }
 
@@ -155,6 +144,17 @@ const transformOpenAIStream = (
       }
 
       case 'response.output_item.done': {
+        // Handle completed image generation
+        if (chunk.item.type === 'image_generation_call' && chunk.item.result) {
+          console.log('✅ Final completed image found in output_item.done');
+          const imageData = `data:image/png;base64,${chunk.item.result}`;
+          return {
+            data: imageData,
+            id: chunk.item.id,
+            type: 'base64_image',
+          };
+        }
+
         if (streamContext.returnedCitationArray?.length) {
           return {
             data: { citations: streamContext.returnedCitationArray },
