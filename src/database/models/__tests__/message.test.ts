@@ -1004,6 +1004,91 @@ describe('MessageModel', () => {
         expect(messageFiles[1].fileId).toBe('img2');
       });
 
+      it('should skip temporary image IDs and base64 data URLs', async () => {
+        // 创建测试数据
+        await serverDB.insert(messages).values({
+          id: 'msg-with-temp-images',
+          userId,
+          role: 'user',
+          content: 'original content',
+        });
+
+        // Test with temporary IDs (like from OpenAI Responses API) and base64 data URLs
+        // These should NOT be inserted into messagesFiles table
+        await messageModel.update('msg-with-temp-images', {
+          content: 'updated content',
+          imageList: [
+            { id: 'tmp_img_abc123', alt: 'temp image', url: 'data:image/png;base64,abc123' },
+            { id: 'tmp_img_def456', alt: 'another temp', url: 'https://example.com/image.png' },
+            { id: 'regular_id', alt: 'base64 image', url: 'data:image/jpeg;base64,def456' },
+          ],
+        });
+
+        // 验证消息更新成功
+        const updatedMessage = await serverDB
+          .select()
+          .from(messages)
+          .where(eq(messages.id, 'msg-with-temp-images'));
+
+        expect(updatedMessage[0].content).toBe('updated content');
+
+        // 验证没有消息文件关联被创建（因为都是临时ID或base64）
+        const messageFiles = await serverDB
+          .select()
+          .from(messagesFiles)
+          .where(eq(messagesFiles.messageId, 'msg-with-temp-images'));
+
+        expect(messageFiles).toHaveLength(0);
+      });
+
+      it('should handle mixed valid and invalid image IDs', async () => {
+        // 创建测试数据
+        await serverDB.insert(messages).values({
+          id: 'msg-mixed-images',
+          userId,
+          role: 'user',
+          content: 'original content',
+        });
+
+        await serverDB.insert(files).values([
+          {
+            id: 'valid_img',
+            name: 'valid.jpg',
+            fileType: 'image/jpeg',
+            size: 100,
+            url: 'url1',
+            userId,
+          },
+        ]);
+
+        // Test with mix of valid file IDs, temporary IDs, and base64 data URLs
+        await messageModel.update('msg-mixed-images', {
+          content: 'updated content',
+          imageList: [
+            { id: 'valid_img', alt: 'valid image', url: 'url1' }, // Should be inserted
+            { id: 'tmp_img_xyz789', alt: 'temp image', url: 'data:image/png;base64,xyz789' }, // Should be skipped
+            { id: 'another_id', alt: 'base64 image', url: 'data:image/jpeg;base64,def456' }, // Should be skipped (base64 URL)
+          ],
+        });
+
+        // 验证消息更新成功
+        const updatedMessage = await serverDB
+          .select()
+          .from(messages)
+          .where(eq(messages.id, 'msg-mixed-images'));
+
+        expect(updatedMessage[0].content).toBe('updated content');
+
+        // 验证只有有效的文件ID被插入到messagesFiles表
+        const messageFiles = await serverDB
+          .select()
+          .from(messagesFiles)
+          .where(eq(messagesFiles.messageId, 'msg-mixed-images'));
+
+        expect(messageFiles).toHaveLength(1);
+        expect(messageFiles[0].fileId).toBe('valid_img');
+      });
+
       it('should handle empty imageList', async () => {
         // 创建测试数据
         await serverDB.insert(messages).values({

@@ -17,7 +17,6 @@ import { getAiInfraStoreState } from '@/store/aiInfra/store';
 import { chatHelpers } from '@/store/chat/helpers';
 import { ChatStore } from '@/store/chat/store';
 import { messageMapKey } from '@/store/chat/utils/messageMapKey';
-import { getFileStoreState } from '@/store/file/store';
 import { useSessionStore } from '@/store/session';
 import { WebBrowsingManifest } from '@/tools/web-browsing';
 import { ChatMessage, CreateMessageParams, SendMessageParams } from '@/types/message';
@@ -539,8 +538,6 @@ export const generateAIChat: StateCreator<
     let thinking = '';
     let thinkingStartAt: number;
     let duration: number;
-    // to upload image
-    const uploadTasks: Map<string, Promise<{ id?: string; url?: string }>> = new Map();
 
     const historySummary = chatConfig.enableCompressHistory
       ? topicSelectors.currentActiveTopicSummary(get())
@@ -591,45 +588,13 @@ export const generateAIChat: StateCreator<
           });
         }
 
-        // 等待所有图片上传完成
+        // Get current images (no upload needed for base64 images)
         let finalImages: ChatImageItem[] = [];
 
-        if (uploadTasks.size > 0) {
-          try {
-            // 等待所有上传任务完成
-            const uploadResults = await Promise.all(uploadTasks.values());
+        const currentMessage = chatSelectors.getMessageById(messageId)(get());
+        finalImages = currentMessage?.imageList || [];
 
-            // 使用上传后的 S3 URL 替换原始图像数据，保持原有的图像 ID 和顺序
-            const currentMessage = chatSelectors.getMessageById(messageId)(get());
-            const currentImages = currentMessage?.imageList || [];
-
-            // Create a map of upload results by original image ID
-            const uploadMap = new Map(uploadResults.map((result) => [(result as any).id, result]));
-
-            // Update images preserving order and handling upload failures gracefully
-            finalImages = currentImages
-              .map((currentImage) => {
-                const uploadResult = uploadMap.get(currentImage.id);
-                if (uploadResult && uploadResult.url && (uploadResult as any).uploadedId) {
-                  // Successfully uploaded - use S3 URL
-                  return {
-                    id: currentImage.id,
-                    url: uploadResult.url,
-                    alt: (uploadResult as any).alt || currentImage.alt,
-                  };
-                } else {
-                  // Upload failed or still in progress - keep base64 URL
-                  return currentImage;
-                }
-              })
-              .filter((img) => !!img.url);
-          } catch (error) {
-            console.error('Error waiting for image uploads:', error);
-            // On error, keep existing images from current message
-            const currentMessage = chatSelectors.getMessageById(messageId)(get());
-            finalImages = currentMessage?.imageList || [];
-          }
-        }
+        // Skip upload handling for OpenAI generated images to avoid FK constraint issues
 
         let parsedToolCalls = toolCalls;
         if (parsedToolCalls && parsedToolCalls.length > 0) {
@@ -678,6 +643,7 @@ export const generateAIChat: StateCreator<
           }
 
           case 'base64_image': {
+            // For OpenAI generated images, just keep them as base64 to avoid upload issues
             internal_dispatchMessage({
               id: messageId,
               type: 'updateMessage',
@@ -685,28 +651,9 @@ export const generateAIChat: StateCreator<
                 imageList: chunk.images.map((i) => ({ id: i.id, url: i.data, alt: i.id })),
               },
             });
-            const image = chunk.image;
 
-            const task = getFileStoreState()
-              .uploadBase64FileWithProgress(image.data)
-              .then((value) => ({
-                id: image.id, // Keep the original image ID for replacement mapping
-                uploadedId: value?.id,
-                url: value?.url,
-                alt: (value as any)?.filename || value?.id || image.id,
-              }))
-              .catch((error) => {
-                console.error('Failed to upload image:', error);
-                // Return original data as fallback
-                return {
-                  id: image.id,
-                  uploadedId: undefined,
-                  url: image.data, // Keep base64 as fallback
-                  alt: image.id,
-                };
-              });
-
-            uploadTasks.set(image.id, task);
+            // Don't upload OpenAI generated images to avoid FK constraint errors
+            // They will remain as base64 data URLs which is acceptable for display
 
             break;
           }
