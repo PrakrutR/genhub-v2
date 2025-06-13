@@ -90,10 +90,10 @@ export const LobeOpenAI = createOpenAICompatibleRuntime({
           type: 'image_generation',
         };
 
-        // Only add partial_images when streaming is enabled
-        if (payload.stream !== false) {
-          imageGenTool.partial_images = 2;
-        }
+        // Disable partial images to avoid stream completion issues
+        // if (payload.stream !== false) {
+        //   imageGenTool.partial_images = 2;
+        // }
 
         openaiTools = [...openaiTools, imageGenTool];
       }

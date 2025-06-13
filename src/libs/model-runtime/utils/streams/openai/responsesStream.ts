@@ -133,17 +133,8 @@ const transformOpenAIStream = (
       }
 
       case 'response.image_generation_call.partial_image': {
-        // Handle streaming partial images
-        if (chunk.partial_image_b64) {
-          const imageData = `data:image/png;base64,${chunk.partial_image_b64}`;
-          return {
-            data: imageData,
-            // Use the same ID as the final image to enable replacement
-            id: chunk.item_id,
-            type: 'base64_image',
-          };
-        }
-        return { data: chunk, id: streamContext.id, type: 'data' };
+        // Skip partial images - only show the final image
+        return { data: null, id: streamContext.id, type: 'data' };
       }
 
       case 'response.output_text.annotation.added': {

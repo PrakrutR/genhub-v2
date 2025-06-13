@@ -286,6 +286,9 @@ export const generateAIChat: StateCreator<
 
     if (!chatLoadingIdsAbortController) return;
 
+    // Set a flag to indicate manual interruption
+    (chatLoadingIdsAbortController.signal as any).manualInterrupt = true;
+
     chatLoadingIdsAbortController.abort(MESSAGE_CANCEL_FLAT);
 
     internal_toggleChatLoading(false, undefined, n('stopGenerateMessage') as string);
@@ -560,6 +563,18 @@ export const generateAIChat: StateCreator<
       },
       isWelcomeQuestion: params?.isWelcomeQuestion,
       onErrorHandle: async (error) => {
+        // Check if this was a manual interruption (user stopped generation)
+        if (abortController?.signal?.aborted && (abortController.signal as any).manualInterrupt) {
+          // Save current content for manual interruptions
+          const currentMessage = chatSelectors.getMessageById(messageId)(get());
+          if (currentMessage && (currentMessage.content || currentMessage.imageList?.length)) {
+            // Keep the current content instead of showing error
+            console.log('Manual interruption detected, preserving content');
+            await refreshMessages();
+            return;
+          }
+        }
+
         await messageService.updateMessageError(messageId, error);
         await refreshMessages();
       },
