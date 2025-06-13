@@ -87,9 +87,6 @@ export const LobeOpenAI = createOpenAICompatibleRuntime({
       // Add image generation tool if enabled (passed from higher level)
       if (enabledImageGeneration) {
         const imageGenTool: OpenAIResponseTool = {
-          background: 'auto',
-          quality: 'auto',
-          size: 'auto',
           type: 'image_generation',
         };
 

@@ -208,10 +208,7 @@ export const createOpenAICompatibleRuntime = <T extends Record<string, any> = an
       this.id = options.id || provider;
     }
 
-    async chat(
-      { responseMode, ...payload }: ChatStreamPayload,
-      options?: ChatMethodOptions,
-    ) {
+    async chat({ responseMode, ...payload }: ChatStreamPayload, options?: ChatMethodOptions) {
       try {
         const inputStartAt = Date.now();
         const postPayload = chatCompletion?.handlePayload
@@ -489,12 +486,23 @@ export const createOpenAICompatibleRuntime = <T extends Record<string, any> = an
 
       const input = await convertOpenAIResponseInputs(messages as any);
 
+      const convertedTools = tools?.map((tool) =>
+        this.convertChatCompletionToolToResponseTool(tool),
+      );
+
+      // Debug logging for Response API tools
+      console.log('🔧 Response API Tools Debug:', {
+        convertedTools,
+        hasImageGeneration: convertedTools?.some((t) => t.type === 'image_generation'),
+        originalTools: tools,
+      });
+
       const postPayload = {
         ...res,
         ...(reasoning_effort ? { reasoning: { effort: reasoning_effort } } : {}),
         input,
         store: false,
-        tools: tools?.map((tool) => this.convertChatCompletionToolToResponseTool(tool)),
+        tools: convertedTools,
       } as OpenAI.Responses.ResponseCreateParamsStreaming;
 
       if (debug?.responses?.()) {
@@ -527,7 +535,12 @@ export const createOpenAICompatibleRuntime = <T extends Record<string, any> = an
       });
     }
 
-    private convertChatCompletionToolToResponseTool = (tool: ChatCompletionTool) => {
+    private convertChatCompletionToolToResponseTool = (tool: ChatCompletionTool | any) => {
+      // If it's already a Response API tool (like image_generation), return as-is
+      if (tool.type !== 'function') {
+        return tool;
+      }
+      // Otherwise, convert function tool from Chat Completion format to Response API format
       return { type: tool.type, ...tool.function };
     };
   };
