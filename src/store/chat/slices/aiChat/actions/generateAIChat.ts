@@ -539,6 +539,11 @@ export const generateAIChat: StateCreator<
     let thinkingStartAt: number;
     let duration: number;
 
+    // Track images captured during streaming to prevent loss in onFinish
+    // Initialize with any existing images from the message (e.g., user uploads)
+    const existingMessage = chatSelectors.getMessageById(messageId)(get());
+    let streamingImages: ChatImageItem[] = existingMessage?.imageList || [];
+
     const historySummary = chatConfig.enableCompressHistory
       ? topicSelectors.currentActiveTopicSummary(get())
       : undefined;
@@ -588,11 +593,10 @@ export const generateAIChat: StateCreator<
           });
         }
 
-        // Get current images (no upload needed for base64 images)
-        let finalImages: ChatImageItem[] = [];
-
-        const currentMessage = chatSelectors.getMessageById(messageId)(get());
-        finalImages = currentMessage?.imageList || [];
+        // Use images tracked during streaming to avoid race condition
+        // where store hasn't updated yet when onFinish runs
+        // This fixes the issue where OpenAI generated images disappear after 1 second
+        let finalImages: ChatImageItem[] = streamingImages;
 
         // Skip upload handling for OpenAI generated images to avoid FK constraint issues
 
@@ -644,11 +648,16 @@ export const generateAIChat: StateCreator<
 
           case 'base64_image': {
             // For OpenAI generated images, just keep them as base64 to avoid upload issues
+            const newImages = chunk.images.map((i) => ({ id: i.id, url: i.data, alt: i.id }));
+
+            // Track images in local variable to prevent loss in onFinish
+            streamingImages = [...streamingImages, ...newImages];
+
             internal_dispatchMessage({
               id: messageId,
               type: 'updateMessage',
               value: {
-                imageList: chunk.images.map((i) => ({ id: i.id, url: i.data, alt: i.id })),
+                imageList: streamingImages, // Use accumulated images, not just new ones
               },
             });
 
