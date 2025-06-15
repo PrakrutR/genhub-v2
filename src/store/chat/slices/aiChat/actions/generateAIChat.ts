@@ -600,6 +600,15 @@ export const generateAIChat: StateCreator<
         // Wait for all image uploads to complete and get S3 URLs for persistence
         let finalImages: ChatImageItem[] = [];
 
+        console.log('🔍 Upload tasks check:', {
+          uploadTasksSize: uploadTasks.size,
+          streamingImagesCount: streamingImages.length,
+          streamingImages: streamingImages.map((img) => ({
+            id: img.id,
+            urlType: img.url?.startsWith('data:') ? 'base64' : 'other',
+          })),
+        });
+
         if (uploadTasks.size > 0) {
           try {
             // Wait for all uploads to complete
@@ -616,6 +625,7 @@ export const generateAIChat: StateCreator<
           }
         } else {
           // No uploads needed, use streaming images
+          console.log('⚠️ No upload tasks found, using streaming images directly');
           finalImages = streamingImages;
         }
 
@@ -666,8 +676,17 @@ export const generateAIChat: StateCreator<
           }
 
           case 'base64_image': {
-            // Display base64 images immediately, then upload to S3 for persistence
-            const newImages = chunk.images.map((i) => ({ id: i.id, url: i.data, alt: i.id }));
+            console.log('🖼️ Processing base64_image event:', chunk);
+
+            // Handle both array format (chunk.images) and single image format (chunk.image)
+            const images = chunk.images || (chunk.image ? [chunk.image] : []);
+            const newImages = images.map((i: any) => ({
+              id: i.id || `img_${Date.now()}`,
+              url: i.data || i.url,
+              alt: i.alt || i.id || `img_${Date.now()}`,
+            }));
+
+            console.log('📝 Processed images:', newImages);
 
             // Add to streaming images for immediate display
             streamingImages = [...streamingImages, ...newImages];

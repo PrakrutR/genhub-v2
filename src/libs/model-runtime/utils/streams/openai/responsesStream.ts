@@ -148,6 +148,10 @@ const transformOpenAIStream = (
         if (chunk.item.type === 'image_generation_call' && chunk.item.result) {
           console.log('✅ Final completed image found in output_item.done');
           const imageData = `data:image/png;base64,${chunk.item.result}`;
+          console.log('🔄 Sending as base64_image event to trigger upload:', {
+            dataLength: imageData.length,
+            id: chunk.item.id,
+          });
           return {
             data: imageData,
             id: chunk.item.id,
