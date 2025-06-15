@@ -17,6 +17,7 @@ import { getAiInfraStoreState } from '@/store/aiInfra/store';
 import { chatHelpers } from '@/store/chat/helpers';
 import { ChatStore } from '@/store/chat/store';
 import { messageMapKey } from '@/store/chat/utils/messageMapKey';
+import { getFileStoreState } from '@/store/file/store';
 import { useSessionStore } from '@/store/session';
 import { WebBrowsingManifest } from '@/tools/web-browsing';
 import { ChatMessage, CreateMessageParams, SendMessageParams } from '@/types/message';
@@ -544,6 +545,9 @@ export const generateAIChat: StateCreator<
     const existingMessage = chatSelectors.getMessageById(messageId)(get());
     let streamingImages: ChatImageItem[] = existingMessage?.imageList || [];
 
+    // Track upload tasks for proper S3 persistence
+    const uploadTasks: Map<string, Promise<ChatImageItem>> = new Map();
+
     const historySummary = chatConfig.enableCompressHistory
       ? topicSelectors.currentActiveTopicSummary(get())
       : undefined;
@@ -593,12 +597,27 @@ export const generateAIChat: StateCreator<
           });
         }
 
-        // Use images tracked during streaming to avoid race condition
-        // where store hasn't updated yet when onFinish runs
-        // This fixes the issue where OpenAI generated images disappear after 1 second
-        let finalImages: ChatImageItem[] = streamingImages;
+        // Wait for all image uploads to complete and get S3 URLs for persistence
+        let finalImages: ChatImageItem[] = [];
 
-        // Skip upload handling for OpenAI generated images to avoid FK constraint issues
+        if (uploadTasks.size > 0) {
+          try {
+            // Wait for all uploads to complete
+            const uploadResults = await Promise.all(uploadTasks.values());
+            finalImages = uploadResults;
+            console.log(
+              '✅ OpenAI images uploaded to S3:',
+              uploadResults.map((img) => ({ id: img.id, hasS3Url: img.url.startsWith('http') })),
+            );
+          } catch (error) {
+            console.error('Error uploading OpenAI images:', error);
+            // Fallback to streaming images (base64) if uploads fail
+            finalImages = streamingImages;
+          }
+        } else {
+          // No uploads needed, use streaming images
+          finalImages = streamingImages;
+        }
 
         let parsedToolCalls = toolCalls;
         if (parsedToolCalls && parsedToolCalls.length > 0) {
@@ -647,22 +666,45 @@ export const generateAIChat: StateCreator<
           }
 
           case 'base64_image': {
-            // For OpenAI generated images, just keep them as base64 to avoid upload issues
+            // Display base64 images immediately, then upload to S3 for persistence
             const newImages = chunk.images.map((i) => ({ id: i.id, url: i.data, alt: i.id }));
 
-            // Track images in local variable to prevent loss in onFinish
+            // Add to streaming images for immediate display
             streamingImages = [...streamingImages, ...newImages];
 
+            // Update UI immediately with base64 data
             internal_dispatchMessage({
               id: messageId,
               type: 'updateMessage',
               value: {
-                imageList: streamingImages, // Use accumulated images, not just new ones
+                imageList: streamingImages,
               },
             });
 
-            // Don't upload OpenAI generated images to avoid FK constraint errors
-            // They will remain as base64 data URLs which is acceptable for display
+            // Upload each image to S3 for persistence
+            for (const image of newImages) {
+              const uploadTask = getFileStoreState()
+                .uploadBase64FileWithProgress(image.url)
+                .then((uploadResult: any) => {
+                  if (uploadResult?.id && uploadResult?.url) {
+                    // Successfully uploaded - return image with S3 URL and file ID
+                    return {
+                      id: uploadResult.id, // Use actual file ID from upload
+                      url: uploadResult.url, // Use S3 URL
+                      alt: uploadResult.filename || uploadResult.id,
+                    } as ChatImageItem;
+                  }
+                  // Upload failed - keep original base64 data
+                  return image;
+                })
+                .catch((error: any) => {
+                  console.error('Failed to upload OpenAI image to S3:', error);
+                  // Return original base64 image as fallback
+                  return image;
+                });
+
+              uploadTasks.set(image.id, uploadTask);
+            }
 
             break;
           }
