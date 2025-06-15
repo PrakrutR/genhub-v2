@@ -676,10 +676,18 @@ export const generateAIChat: StateCreator<
           }
 
           case 'base64_image': {
-            console.log('🖼️ Processing base64_image event:', chunk);
+            console.log('🖼️ Action received base64_image event:', {
+              chunkId: chunk.id,
+              hasImage: !!chunk.image,
+              hasImages: !!chunk.images,
+              imagesLength: chunk.images?.length,
+              imageData: chunk.image?.data?.slice(0, 50) + '...',
+            });
 
             // Handle both array format (chunk.images) and single image format (chunk.image)
             const images = chunk.images || (chunk.image ? [chunk.image] : []);
+            console.log('🔍 Processing images array:', images.length, 'items');
+
             const newImages = images.map((i: any) => ({
               id: i.id || `img_${Date.now()}`,
               url: i.data || i.url,

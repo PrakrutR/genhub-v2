@@ -445,10 +445,20 @@ export const fetchSSE = async (url: string, options: RequestInit & FetchSSEOptio
         }
 
         case 'base64_image': {
+          console.log('🔄 fetchSSE received base64_image event:', {
+            data: typeof data,
+            dataLength: data?.length,
+          });
           const id = 'tmp_img_' + nanoid();
           const item = { data, id, isBase64: true };
           images.push(item);
 
+          console.log('📤 fetchSSE calling onMessageHandle with:', {
+            id,
+            imageId: item.id,
+            imagesLength: images.length,
+            type: 'base64_image',
+          });
           options.onMessageHandle?.({ id, image: item, images, type: 'base64_image' });
           break;
         }
