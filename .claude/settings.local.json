@@ -1,10 +1,6 @@
 {
   "permissions": {
-    "allow": [
-      "Bash(grep:*)",
-      "Bash(rg:*)",
-      "Bash(pnpm list:*)"
-    ],
+    "allow": ["Bash(grep:*)", "Bash(rg:*)", "Bash(pnpm list:*)", "Bash(find:*)", "Bash(sed:*)"],
     "deny": []
   }
 }

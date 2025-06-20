@@ -18,8 +18,8 @@ jobs:
     steps:
       - name: Configure Git
         run: |
-          git config --global user.name "lobehubbot"
-          git config --global user.email "i@lobehub.com"
+          git config --global user.name "genhubot"
+          git config --global user.email "prakrut.rajesh07@gmail.com"
 
       - uses: actions/checkout@v4
         with:
@@ -43,7 +43,7 @@ jobs:
         id: cpr
         uses: peter-evans/create-pull-request@v7
         with:
-          token: ${{ secrets.GH_TOKEN }}
+          token: ${{ secrets.GITHUB_TOKEN }}
           add-paths: |
             locales/**/*.json
           labels: |

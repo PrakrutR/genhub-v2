@@ -1,6 +1,6 @@
 <a name="readme-top"></a>
 
-# Changelog
+# GenHub Changelog
 
 ### [Version 1.94.17](https://github.com/lobehub/lobe-chat/compare/v1.94.16...v1.94.17)
 
