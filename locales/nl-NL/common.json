@@ -31,7 +31,7 @@
   "batchDelete": "Batch verwijderen",
   "blog": "Product Blog",
   "branching": "Subonderwerp aanmaken",
-  "branchingDisable": "De functie 'Subonderwerp' is alleen beschikbaar in de serverversie. Als je deze functie wilt gebruiken, schakel dan over naar de serverimplementatiemodus of gebruik LobeChat Cloud.",
+  "branchingDisable": "De subonderwerpfunctie is niet beschikbaar in de huidige modus. Om deze functie te gebruiken, schakel over naar de Postgres/Pglite DB-modus of gebruik GenHub Cloud",
   "cancel": "Annuleren",
   "changelog": "Wijzigingslogboek",
   "clientDB": {
@@ -331,11 +331,11 @@
     "setting": "Instellingen"
   },
   "telemetry": {
-    "allow": "Toestaan",
-    "deny": "Weigeren",
-    "desc": "We willen graag anonieme gebruiksgegevens verzamelen om LobeChat te verbeteren en een betere productervaring te bieden. Je kunt dit op elk moment uitschakelen in 'Instellingen' - 'Over'.",
+    "allow": "Blijven gebruiken",
+    "deny": "Gegevensverzameling uitschakelen",
+    "desc": "We verzamelen anoniem je gebruiksinformatie om ons te helpen {{appName}} te verbeteren en je een betere productervaring te bieden. Je kunt deze functie altijd uitschakelen via 'Instellingen' - 'Over'.",
     "learnMore": "Meer informatie",
-    "title": "Help LobeChat verbeteren"
+    "title": "{{appName}} verzamelt anonieme gebruiksgegevens"
   },
   "temp": "tijdelijk",
   "terms": "algemene voorwaarden",

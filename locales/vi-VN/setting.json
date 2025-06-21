@@ -13,7 +13,7 @@
   },
   "analytics": {
     "telemetry": {
-      "desc": "Bằng cách chọn gửi dữ liệu telemetry, bạn có thể giúp chúng tôi cải thiện trải nghiệm người dùng tổng thể của {{appName}}",
+      "desc": "Tắt tùy chọn này sẽ ngừng gửi dữ liệu thu thập từ xa. Khi bật, bạn có thể giúp chúng tôi cải thiện trải nghiệm người dùng tổng thể của {{appName}}",
       "title": "Gửi dữ liệu sử dụng ẩn danh"
     },
     "title": "Thống kê dữ liệu"

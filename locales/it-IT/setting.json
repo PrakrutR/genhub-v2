@@ -13,7 +13,7 @@
   },
   "analytics": {
     "telemetry": {
-      "desc": "Selezionando di inviare i dati di telemetria, puoi aiutarci a migliorare l'esperienza complessiva degli utenti di {{appName}}",
+      "desc": "Disattivando questa opzione si interromperà l'invio dei dati di telemetria. Quando è attivata, puoi aiutarci a migliorare l'esperienza utente complessiva di {{appName}}",
       "title": "Invio dati anonimi"
     },
     "title": "Analisi"

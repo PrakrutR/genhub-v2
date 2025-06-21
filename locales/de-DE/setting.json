@@ -13,7 +13,7 @@
   },
   "analytics": {
     "telemetry": {
-      "desc": "Indem du die Übertragung von Telemetriedaten auswählst, kannst du uns helfen, das Gesamterlebnis der Nutzer von {{appName}} zu verbessern.",
+      "desc": "Wenn diese Option deaktiviert ist, werden keine Telemetriedaten mehr gesendet. Wenn sie aktiviert ist, können Sie uns dabei helfen, die Benutzererfahrung von {{appName}} insgesamt zu verbessern.",
       "title": "Anonyme Nutzungsdaten senden"
     },
     "title": "Analytics"

@@ -31,7 +31,7 @@
   "batchDelete": "Massenlöschung",
   "blog": "Produkt-Blog",
   "branching": "Unterthema erstellen",
-  "branchingDisable": "Die Funktion „Unterthema“ ist nur in der Serverversion verfügbar. Wenn Sie diese Funktion benötigen, wechseln Sie bitte in den Serverbereitstellungsmodus oder verwenden Sie LobeChat Cloud.",
+  "branchingDisable": "Die Unterthemen-Funktion ist im aktuellen Modus nicht verfügbar. Um diese Funktion zu nutzen, wechseln Sie bitte in den Postgres/Pglite DB-Modus oder verwenden Sie GenHub Cloud.",
   "cancel": "Abbrechen",
   "changelog": "Änderungsprotokoll",
   "clientDB": {
@@ -331,11 +331,11 @@
     "setting": "Einstellung"
   },
   "telemetry": {
-    "allow": "Erlauben",
-    "deny": "Verweigern",
-    "desc": "Wir möchten anonyme Nutzungsdaten sammeln, um uns bei der Verbesserung von LobeChat zu helfen und dir ein besseres Produkterlebnis zu bieten. Du kannst dies jederzeit in den „Einstellungen“ - „Über“ deaktivieren.",
+    "allow": "Weiter verwenden",
+    "deny": "Datenerfassung deaktivieren",
+    "desc": "Wir sammeln anonym Ihre Nutzungsdaten, um {{appName}} zu verbessern und Ihnen ein besseres Produkterlebnis zu bieten. Sie können diese Funktion jederzeit unter „Einstellungen“ - „Über“ deaktivieren.",
     "learnMore": "Mehr erfahren",
-    "title": "Hilf LobeChat, besser zu werden"
+    "title": "{{appName}} sammelt anonyme Nutzungsdaten"
   },
   "temp": "Temporär",
   "terms": "Nutzungsbedingungen",

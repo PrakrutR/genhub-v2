@@ -13,7 +13,7 @@
   },
   "analytics": {
     "telemetry": {
-      "desc": "Al seleccionar enviar datos de telemetría, puedes ayudarnos a mejorar la experiencia general del usuario en {{appName}}",
+      "desc": "Desactivar esta opción detendrá el envío de datos de telemetría. Cuando está activada, puedes ayudarnos a mejorar la experiencia general del usuario de {{appName}}",
       "title": "Enviar datos de uso anónimos"
     },
     "title": "Análisis de datos"

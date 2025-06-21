@@ -31,7 +31,7 @@
   "batchDelete": "Toplu Sil",
   "blog": "Ürün Blogu",
   "branching": "Alt konu oluştur",
-  "branchingDisable": "«Alt konu» özelliği yalnızca sunucu sürümünde mevcuttur. Bu özelliği kullanmak için lütfen sunucu dağıtım moduna geçin veya LobeChat Cloud'u kullanın.",
+  "branchingDisable": "Alt konu özelliği mevcut modda kullanılamıyor. Bu özelliği kullanmak için lütfen Postgres/Pglite DB moduna geçin veya GenHub Cloud'u kullanın",
   "cancel": "İptal",
   "changelog": "Changelog",
   "clientDB": {
@@ -331,11 +331,11 @@
     "setting": "Ayarlar"
   },
   "telemetry": {
-    "allow": "İzin ver",
-    "deny": "Reddet",
-    "desc": "Anonim kullanım bilgilerinizi toplamamıza izin vererek LobeChat'i geliştirmemize ve size daha iyi bir ürün deneyimi sunmamıza yardımcı olabilirsiniz. Dilediğiniz zaman 'Ayarlar' - 'Hakkında' bölümünden devre dışı bırakabilirsiniz.",
+    "allow": "Kullanmaya devam et",
+    "deny": "Veri toplama kapatıldı",
+    "desc": "{{appName}}'yi geliştirmemize ve size daha iyi bir ürün deneyimi sunmamıza yardımcı olmak için kullanım bilgilerinizi anonim olarak topluyoruz. Bu özelliği istediğiniz zaman \"Ayarlar\" - \"Hakkında\" bölümünden kapatabilirsiniz.",
     "learnMore": "Daha Fazla Bilgi",
-    "title": "LobeChat'i Geliştirmemize Yardımcı Olun"
+    "title": "{{appName}} anonim kullanım verileri topluyor"
   },
   "temp": "Geçici",
   "terms": "Hizmet Koşulları",

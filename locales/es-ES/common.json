@@ -31,7 +31,7 @@
   "batchDelete": "Eliminar en lote",
   "blog": "Blog de productos",
   "branching": "Crear subtemas",
-  "branchingDisable": "La función de «subtemas» solo está disponible en la versión del servidor. Si necesita esta función, cambie al modo de implementación del servidor o utilice LobeChat Cloud.",
+  "branchingDisable": "La función de subtemas no está disponible en el modo actual. Para usar esta función, cambia al modo de base de datos Postgres/Pglite o utiliza GenHub Cloud",
   "cancel": "Cancelar",
   "changelog": "Registro de cambios",
   "clientDB": {
@@ -331,11 +331,11 @@
     "setting": "Configuración"
   },
   "telemetry": {
-    "allow": "Permitir",
-    "deny": "Denegar",
-    "desc": "Queremos recopilar información sobre tu uso de forma anónima para ayudarnos a mejorar LobeChat y ofrecerte una mejor experiencia de producto. Puedes desactivarlo en 'Configuración' - 'Acerca de' en cualquier momento.",
+    "allow": "Continuar usando",
+    "deny": "Desactivar recopilación de datos",
+    "desc": "Estamos recopilando de forma anónima tu información de uso para ayudarnos a mejorar {{appName}} y ofrecerte una mejor experiencia de producto. Puedes desactivar esta función en cualquier momento en «Configuración» - «Acerca de».",
     "learnMore": "Más información",
-    "title": "Ayuda a mejorar LobeChat"
+    "title": "{{appName}} está recopilando datos de uso anónimos"
   },
   "temp": "Temporal",
   "terms": "Términos de servicio",

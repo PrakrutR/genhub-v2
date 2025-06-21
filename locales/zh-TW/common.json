@@ -31,7 +31,7 @@
   "batchDelete": "批次刪除",
   "blog": "產品部落格",
   "branching": "建立子主題",
-  "branchingDisable": "「子主題」功能僅在伺服器端版本可用，如需該功能，請切換到伺服器端部署模式或使用 LobeChat Cloud",
+  "branchingDisable": "子主題功能在當前模式下不可用。要使用此功能，請切換到 Postgres/Pglite 資料庫模式或使用 GenHub Cloud",
   "cancel": "取消",
   "changelog": "變更日誌",
   "clientDB": {
@@ -331,11 +331,11 @@
     "setting": "設定"
   },
   "telemetry": {
-    "allow": "允許",
-    "deny": "拒絕",
-    "desc": "我們希望匿名獲取你的使用信息，進而幫助我們改進 LobeChat，並為你提供更好的產品體驗。你可以在「設定」 - 「關於」隨時關閉。",
+    "allow": "繼續使用",
+    "deny": "關閉資料收集",
+    "desc": "我們正在匿名收集你的使用資訊，以幫助我們改進 {{appName}} 並為你提供更好的產品體驗。你可以隨時在「設定」-「關於」中關閉此功能。",
     "learnMore": "了解更多",
-    "title": "幫助 LobeChat 做得更好"
+    "title": "{{appName}} 正在收集匿名使用資料"
   },
   "temp": "臨時",
   "terms": "服務條款",

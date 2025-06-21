@@ -13,7 +13,7 @@
   },
   "analytics": {
     "telemetry": {
-      "desc": "Door te kiezen voor het verzenden van telemetriegegevens, kun je ons helpen de algehele gebruikerservaring van {{appName}} te verbeteren.",
+      "desc": "Als u deze optie uitschakelt, wordt het verzenden van telemetriegegevens gestopt. Wanneer ingeschakeld, kunt u ons helpen de algehele gebruikerservaring van {{appName}} te verbeteren",
       "title": "Anonieme gebruiksgegevens verzenden"
     },
     "title": "Analytics"

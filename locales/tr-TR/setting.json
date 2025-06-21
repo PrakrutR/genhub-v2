@@ -13,7 +13,7 @@
   },
   "analytics": {
     "telemetry": {
-      "desc": "{{appName}} genel kullanıcı deneyimini geliştirmemize yardımcı olmak için telemetri verilerini göndermeyi seçerek katkıda bulunabilirsiniz.",
+      "desc": "Bu seçeneği kapatmak, telemetri verilerinin gönderilmesini durduracaktır. Açık olduğunda, {{appName}} genel kullanıcı deneyimini geliştirmemize yardımcı olabilirsiniz",
       "title": "Anonim Kullanım Verileri Gönder"
     },
     "title": "Analitik"

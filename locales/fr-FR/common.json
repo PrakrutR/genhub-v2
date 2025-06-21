@@ -31,7 +31,7 @@
   "batchDelete": "Suppression en masse",
   "blog": "Blog des produits",
   "branching": "Créer un sous-sujet",
-  "branchingDisable": "La fonction « sous-sujet » n'est disponible que dans la version serveur. Si vous avez besoin de cette fonctionnalité, veuillez passer en mode de déploiement serveur ou utiliser LobeChat Cloud.",
+  "branchingDisable": "La fonctionnalité de sous-sujets n'est pas disponible dans le mode actuel. Pour utiliser cette fonctionnalité, veuillez passer au mode base de données Postgres/Pglite ou utiliser GenHub Cloud",
   "cancel": "Annuler",
   "changelog": "Journal des modifications",
   "clientDB": {
@@ -331,11 +331,11 @@
     "setting": "Paramètre"
   },
   "telemetry": {
-    "allow": "Autoriser",
-    "deny": "Refuser",
-    "desc": "Nous aimerions recueillir anonymement des informations sur votre utilisation afin de nous aider à améliorer LobeChat et à vous offrir une meilleure expérience produit. Vous pouvez désactiver cette fonctionnalité à tout moment dans les paramètres - À propos.",
+    "allow": "Continuer à utiliser",
+    "deny": "Désactiver la collecte de données",
+    "desc": "Nous collectons anonymement vos informations d'utilisation afin de nous aider à améliorer {{appName}} et à vous offrir une meilleure expérience produit. Vous pouvez désactiver cette fonctionnalité à tout moment dans « Paramètres » - « À propos ».",
     "learnMore": "En savoir plus",
-    "title": "Aider LobeChat à s'améliorer"
+    "title": "{{appName}} collecte des données d'utilisation anonymes"
   },
   "temp": "Temporaire",
   "terms": "Conditions de service",

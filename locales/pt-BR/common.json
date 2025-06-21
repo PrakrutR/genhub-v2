@@ -31,7 +31,7 @@
   "batchDelete": "Excluir em massa",
   "blog": "Blog de Produtos",
   "branching": "Criar subtópico",
-  "branchingDisable": "A funcionalidade de \"subtópico\" está disponível apenas na versão do servidor. Se precisar dessa funcionalidade, mude para o modo de implantação no servidor ou use o LobeChat Cloud.",
+  "branchingDisable": "O recurso de sub-tópicos não está disponível no modo atual. Para usar este recurso, por favor, mude para o modo de banco de dados Postgres/Pglite ou utilize o GenHub Cloud",
   "cancel": "Cancelar",
   "changelog": "Registro de alterações",
   "clientDB": {
@@ -331,11 +331,11 @@
     "setting": "Configuração"
   },
   "telemetry": {
-    "allow": "Permitir",
-    "deny": "Negar",
-    "desc": "Queremos coletar anonimamente suas informações de uso para nos ajudar a melhorar o LobeChat e oferecer uma experiência de produto melhor para você. Você pode desativar a qualquer momento em Configurações - Sobre.",
+    "allow": "Continuar usando",
+    "deny": "Desativar coleta de dados",
+    "desc": "Estamos coletando suas informações de uso anonimamente para nos ajudar a melhorar o {{appName}} e oferecer uma melhor experiência de produto. Você pode desativar este recurso a qualquer momento em \"Configurações\" - \"Sobre\".",
     "learnMore": "Saiba mais",
-    "title": "Ajude o LobeChat a melhorar"
+    "title": "{{appName}} está coletando dados de uso anônimos"
   },
   "temp": "Temporário",
   "terms": "Termos de Serviço",

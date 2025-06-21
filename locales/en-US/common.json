@@ -31,7 +31,7 @@
   "batchDelete": "Batch Delete",
   "blog": "Product Blog",
   "branching": "Create Subtopic",
-  "branchingDisable": "The 'Subtopic' feature is only available in the server version. If you need this feature, please switch to server deployment mode or use LobeChat Cloud.",
+  "branchingDisable": "The sub-topic feature is not available in the current mode. To use this feature, please switch to Postgres/Pglite DB mode or use GenHub Cloud.",
   "cancel": "Cancel",
   "changelog": "Changelog",
   "clientDB": {
@@ -331,11 +331,11 @@
     "setting": "Settings"
   },
   "telemetry": {
-    "allow": "Allow",
-    "deny": "Deny",
-    "desc": "We would like to anonymously collect usage information to help us improve LobeChat and provide you with a better product experience. You can disable this at any time in Settings - About.",
+    "allow": "Continue",
+    "deny": "Disable Data Collection",
+    "desc": "We are anonymously collecting your usage information to help us improve {{appName}} and provide you with a better product experience. You can disable this feature anytime in \"Settings\" - \"About\".",
     "learnMore": "Learn More",
-    "title": "Help LobeChat be better"
+    "title": "{{appName}} is collecting anonymous usage data"
   },
   "temp": "Temporary",
   "terms": "Terms of Service",

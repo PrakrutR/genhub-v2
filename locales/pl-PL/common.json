@@ -31,7 +31,7 @@
   "batchDelete": "Usuń wiele",
   "blog": "Blog produktowy",
   "branching": "Utwórz podtemat",
-  "branchingDisable": "Funkcja „podtemat” jest dostępna tylko w wersji serwerowej. Aby skorzystać z tej funkcji, przełącz się na tryb wdrożenia serwera lub użyj LobeChat Cloud.",
+  "branchingDisable": "Funkcja podtematów nie jest dostępna w obecnym trybie. Aby korzystać z tej funkcji, przełącz się na tryb bazy danych Postgres/Pglite lub użyj GenHub Cloud",
   "cancel": "Anuluj",
   "changelog": "Dziennik zmian",
   "clientDB": {
@@ -331,11 +331,11 @@
     "setting": "Ustawienia"
   },
   "telemetry": {
-    "allow": "Zezwalaj",
-    "deny": "Odmów",
-    "desc": "Chcemy anonimowo zbierać informacje o twoim użytkowaniu, aby pomóc nam ulepszyć LobeChat i zapewnić ci lepsze doświadczenia z naszym produktem. Możesz wyłączyć to w każdej chwili w „Ustawienia” - „O nas”.",
+    "allow": "Kontynuuj korzystanie",
+    "deny": "Wyłącz zbieranie danych",
+    "desc": "Anonimowo zbieramy informacje o Twoim użytkowaniu, aby pomóc nam ulepszyć {{appName}} i zapewnić Ci lepsze doświadczenia z produktem. Możesz w każdej chwili wyłączyć tę funkcję w „Ustawienia” - „Informacje”.",
     "learnMore": "Dowiedz się więcej",
-    "title": "Pomóż LobeChat stawać się lepszym"
+    "title": "{{appName}} zbiera anonimowe dane użytkowania"
   },
   "temp": "Tymczasowy",
   "terms": "Warunki korzystania",

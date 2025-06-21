@@ -31,7 +31,7 @@
   "batchDelete": "批量删除",
   "blog": "产品博客",
   "branching": "创建子话题",
-  "branchingDisable": "「子话题」功能在当前模式下不可用，如需该功能，请切换到 Postgres/Pglite DB 模式或使用 LobeChat Cloud",
+  "branchingDisable": "Sub-topic feature is not available in the current mode. To use this feature, please switch to Postgres/Pglite DB mode or use GenHub Cloud",
   "cancel": "取消",
   "changelog": "更新日志",
   "clientDB": {
@@ -331,11 +331,11 @@
     "setting": "设置"
   },
   "telemetry": {
-    "allow": "允许",
-    "deny": "拒绝",
-    "desc": "我们希望匿名获取你的使用信息，进而帮助我们改进 {{appName}}，并为你提供更好的产品体验。你可以在「设置」 - 「关于」随时关闭。",
+    "allow": "继续使用",
+    "deny": "关闭数据收集",
+    "desc": "我们正在匿名收集你的使用信息，以帮助我们改进 {{appName}} 并为你提供更好的产品体验。你可以随时在「设置」 - 「关于」中关闭此功能。",
     "learnMore": "了解更多",
-    "title": "帮助 {{appName}} 做得更好"
+    "title": "{{appName}} 正在收集匿名使用数据"
   },
   "temp": "临时",
   "terms": "服务条款",

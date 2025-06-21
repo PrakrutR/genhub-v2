@@ -13,7 +13,7 @@
   },
   "analytics": {
     "telemetry": {
-      "desc": "By opting to send telemetry data, you can help us improve the overall user experience of {{appName}}.",
+      "desc": "Disabling this option will stop sending telemetry data. When enabled, you can help us improve the overall user experience of {{appName}}.",
       "title": "Send Anonymous Usage Data"
     },
     "title": "Analytics"
