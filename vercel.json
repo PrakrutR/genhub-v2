@@ -1,22 +1,9 @@
 {
   "buildCommand": "NODE_OPTIONS=--max-old-space-size=6144 bun run build",
   "installCommand": "bun install",
-  "redirects": [
-    {
-      "source": "/(.*)",
-      "has": [
-        {
-          "type": "host",
-          "value": "agents.genhub.app"
-        }
-      ],
-      "destination": "/404",
-      "statusCode": 404
-    }
-  ],
   "rewrites": [
     {
-      "source": "/agents.json",
+      "source": "/",
       "has": [
         {
           "type": "host",
@@ -24,6 +11,26 @@
         }
       ],
       "destination": "/agents.json"
+    },
+    {
+      "source": "/(.*)",
+      "has": [
+        {
+          "type": "host",
+          "value": "terms.genhub.app"
+        }
+      ],
+      "destination": "/terms"
+    },
+    {
+      "source": "/(.*)",
+      "has": [
+        {
+          "type": "host",
+          "value": "policy.genhub.app"
+        }
+      ],
+      "destination": "/privacy"
     }
   ]
 }

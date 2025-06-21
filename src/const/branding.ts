@@ -10,9 +10,9 @@ export const BRANDING_LOGO_URL = '/logo.png';
 export const ORG_NAME = 'GenHub';
 
 export const BRANDING_URL = {
-  help: '/help',
-  privacy: '/privacy',
-  terms: '/terms',
+  help: 'https://github.com/PrakrutR/genhub-v2/wiki',
+  privacy: 'https://policy.genhub.app',
+  terms: 'https://terms.genhub.app',
 };
 
 export const SOCIAL_URL = {
