@@ -1,7 +1,7 @@
 {
   "name": "@lobehub/chat",
-  "version": "1.96.5",
-  "description": "GenHub - a high-performance AI chat platform that supports speech synthesis, multimodal capabilities, and extensible Function Call plugin system. Experience advanced AI conversations at genhub.app.",
+  "version": "1.96.9",
+  "description": "Lobe Chat - an open-source, high-performance chatbot framework that supports speech synthesis, multimodal, and extensible Function Call plugin system. Supports one-click free deployment of your private ChatGPT/LLM web application.",
   "keywords": [
     "framework",
     "chatbot",
@@ -14,16 +14,16 @@
     "tts",
     "stt"
   ],
-  "homepage": "https://github.com/PrakrutR/genhub-v2",
+  "homepage": "https://github.com/lobehub/lobe-chat",
   "bugs": {
-    "url": "https://github.com/PrakrutR/genhub-v2/issues/new/choose/"
+    "url": "https://github.com/lobehub/lobe-chat/issues/new/choose"
   },
   "repository": {
     "type": "git",
-    "url": "https://github.com/PrakrutR/genhub-v2.git"
+    "url": "https://github.com/lobehub/lobe-chat.git"
   },
   "license": "MIT",
-  "author": "Prakrut <admin@genhub.app>",
+  "author": "LobeHub <i@lobehub.com>",
   "sideEffects": false,
   "workspaces": [
     "packages/*"
