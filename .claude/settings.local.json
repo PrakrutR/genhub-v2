@@ -10,7 +10,10 @@
       "Bash(git fetch:*)",
       "Bash(git merge:*)",
       "Bash(git checkout:*)",
-      "Bash(git add:*)"
+      "Bash(git add:*)",
+      "Bash(bun install:*)",
+      "Bash(pnpm install:*)",
+      "Bash(ls:*)"
     ],
     "deny": []
   }
