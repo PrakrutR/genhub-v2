@@ -921,10 +921,10 @@
     "description": "Doubao-Seed-1.6 es un nuevo modelo multimodal de pensamiento profundo que soporta tres modos de pensamiento: automático, reflexivo y no reflexivo. En modo no reflexivo, el rendimiento del modelo mejora significativamente en comparación con Doubao-1.5-pro/250115. Soporta una ventana de contexto de 256k y una longitud máxima de salida de 16k tokens."
   },
   "doubao-seed-1.6-flash": {
-    "description": "Doubao-Seed-1.6-flash es un modelo multimodal de pensamiento profundo con velocidad de inferencia extrema, TPOT de solo 10 ms; soporta comprensión tanto textual como visual, con capacidad de comprensión textual superior a la generación lite anterior y comprensión visual comparable a la serie pro de competidores. Soporta una ventana de contexto de 256k y una longitud máxima de salida de 16k tokens."
+    "description": "Doubao-Seed-1.6-flash es un modelo multimodal de pensamiento profundo con velocidad de inferencia extrema, TPOT de solo 10 ms; soporta comprensión tanto textual como visual, con capacidad de comprensión textual superior a la generación lite anterior y comprensión visual comparable a los modelos pro de la competencia. Soporta una ventana de contexto de 256k y una longitud máxima de salida de 16k tokens."
   },
   "doubao-seed-1.6-thinking": {
-    "description": "El modelo Doubao-Seed-1.6-thinking tiene una capacidad de pensamiento significativamente mejorada. En comparación con Doubao-1.5-thinking-pro, mejora aún más en habilidades básicas como programación, matemáticas y razonamiento lógico, además de soportar comprensión visual. Soporta una ventana de contexto de 256k y una longitud máxima de salida de 16k tokens."
+    "description": "El modelo Doubao-Seed-1.6-thinking tiene una capacidad de pensamiento significativamente mejorada. En comparación con Doubao-1.5-thinking-pro, mejora aún más en habilidades básicas como programación, matemáticas y razonamiento lógico, y soporta comprensión visual. Soporta una ventana de contexto de 256k y una longitud máxima de salida de 16k tokens."
   },
   "emohaa": {
     "description": "Emohaa es un modelo psicológico con capacidades de consulta profesional, ayudando a los usuarios a comprender problemas emocionales."
@@ -1345,6 +1345,9 @@
   },
   "grok-3-mini-fast": {
     "description": "Modelo ligero que piensa antes de responder. Rápido e inteligente, adecuado para tareas lógicas que no requieren conocimientos profundos de dominio y capaz de proporcionar la trayectoria original del pensamiento."
+  },
+  "grok-4": {
+    "description": "Nuestro modelo insignia más reciente y potente, que destaca en procesamiento de lenguaje natural, cálculo matemático y razonamiento — un competidor versátil y perfecto."
   },
   "gryphe/mythomax-l2-13b": {
     "description": "MythoMax l2 13B es un modelo de lenguaje que combina creatividad e inteligencia, fusionando múltiples modelos de vanguardia."
@@ -1844,6 +1847,9 @@
   "moonshot-v1-auto": {
     "description": "Moonshot V1 Auto puede seleccionar el modelo adecuado según la cantidad de tokens ocupados en el contexto actual."
   },
+  "moonshotai/Kimi-Dev-72B": {
+    "description": "Kimi-Dev-72B es un modelo de código abierto de gran escala, optimizado mediante aprendizaje reforzado a gran escala, capaz de generar parches robustos y listos para producción. Este modelo alcanzó un nuevo récord del 60.4 % en SWE-bench Verified, estableciendo un nuevo estándar para modelos de código abierto en tareas automatizadas de ingeniería de software como la corrección de errores y la revisión de código."
+  },
   "nousresearch/hermes-2-pro-llama-3-8b": {
     "description": "Hermes 2 Pro Llama 3 8B es una versión mejorada de Nous Hermes 2, que incluye los conjuntos de datos más recientes desarrollados internamente."
   },
@@ -1866,19 +1872,25 @@
     "description": "o1 es el nuevo modelo de inferencia de OpenAI, adecuado para tareas complejas que requieren un amplio conocimiento general. Este modelo tiene un contexto de 128K y una fecha de corte de conocimiento en octubre de 2023."
   },
   "o1-pro": {
-    "description": "La serie o1 ha sido entrenada mediante aprendizaje reforzado para pensar antes de responder y ejecutar tareas de razonamiento complejas. El modelo o1-pro utiliza más recursos computacionales para un pensamiento más profundo, proporcionando respuestas de calidad superior de manera continua."
+    "description": "La serie o1 ha sido entrenada mediante aprendizaje reforzado para pensar antes de responder y ejecutar tareas de razonamiento complejas. El modelo o1-pro utiliza más recursos computacionales para un pensamiento más profundo, proporcionando respuestas de calidad superior de manera constante."
   },
   "o3": {
     "description": "o3 es un modelo versátil y potente, que destaca en múltiples campos. Establece un nuevo estándar para tareas de matemáticas, ciencia, programación y razonamiento visual. También es hábil en redacción técnica y seguimiento de instrucciones. Los usuarios pueden utilizarlo para analizar texto, código e imágenes, resolviendo problemas complejos de múltiples pasos."
+  },
+  "o3-deep-research": {
+    "description": "o3-deep-research es nuestro modelo de investigación profunda más avanzado, diseñado específicamente para manejar tareas complejas de investigación en múltiples pasos. Puede buscar y sintetizar información de Internet, así como acceder y utilizar tus propios datos a través del conector MCP."
   },
   "o3-mini": {
     "description": "o3-mini es nuestro último modelo de inferencia de tamaño pequeño, que ofrece alta inteligencia con los mismos objetivos de costo y latencia que o1-mini."
   },
   "o3-pro": {
-    "description": "El modelo o3-pro utiliza más capacidad computacional para pensar más profundamente y siempre ofrecer mejores respuestas, soportado únicamente bajo la API de Responses."
+    "description": "El modelo o3-pro utiliza más capacidad computacional para pensar más profundamente y siempre ofrecer mejores respuestas, y solo está disponible para uso bajo la API de Responses."
   },
   "o4-mini": {
     "description": "o4-mini es nuestro último modelo de la serie o en formato pequeño. Está optimizado para una inferencia rápida y efectiva, mostrando una alta eficiencia y rendimiento en tareas de codificación y visuales."
+  },
+  "o4-mini-deep-research": {
+    "description": "o4-mini-deep-research es nuestro modelo de investigación profunda más rápido y asequible, ideal para manejar tareas complejas de investigación en múltiples pasos. Puede buscar y sintetizar información de Internet, así como acceder y utilizar tus propios datos a través del conector MCP."
   },
   "open-codestral-mamba": {
     "description": "Codestral Mamba es un modelo de lenguaje Mamba 2 enfocado en la generación de código, que proporciona un fuerte apoyo para tareas avanzadas de codificación y razonamiento."
@@ -2275,6 +2287,9 @@
   },
   "taichu_vl": {
     "description": "Integra capacidades de comprensión de imágenes, transferencia de conocimiento y atribución lógica, destacándose en el campo de preguntas y respuestas basadas en texto e imagen."
+  },
+  "tencent/Hunyuan-A13B-Instruct": {
+    "description": "Hunyuan-A13B-Instruct cuenta con 80 mil millones de parámetros, activando solo 13 mil millones para igualar modelos más grandes, soporta razonamiento híbrido de \"pensamiento rápido/pensamiento lento\"; comprensión estable de textos largos; validado por BFCL-v3 y τ-Bench, con capacidades avanzadas de agente; combina GQA y múltiples formatos de cuantificación para lograr inferencias eficientes."
   },
   "text-embedding-3-large": {
     "description": "El modelo de vectorización más potente, adecuado para tareas en inglés y no inglés."

@@ -6,7 +6,11 @@
       "Bash(pnpm list:*)",
       "Bash(find:*)",
       "Bash(sed:*)",
-      "Bash(rm:*)"
+      "Bash(rm:*)",
+      "Bash(git fetch:*)",
+      "Bash(git merge:*)",
+      "Bash(git checkout:*)",
+      "Bash(git add:*)"
     ],
     "deny": []
   }
