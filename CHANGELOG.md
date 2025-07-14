@@ -2,6 +2,183 @@
 
 # GenHub Changelog
 
+## [Version 1.99.0](https://github.com/lobehub/lobe-chat/compare/v1.98.2...v1.99.0)
+
+<sup>Released on **2025-07-14**</sup>
+
+#### ✨ Features
+
+- **plugin**: Support Streamable HTTP MCP Server Auth.
+- **misc**: support AI Image.
+
+<br/>
+
+<details>
+<summary><kbd>Improvements and Fixes</kbd></summary>
+
+#### What's improved
+
+- **plugin**: Support Streamable HTTP MCP Server Auth, closes [#8425](https://github.com/lobehub/lobe-chat/issues/8425) ([853a09a](https://github.com/lobehub/lobe-chat/commit/853a09a))
+- **misc**: support AI Image, closes [#8312](https://github.com/lobehub/lobe-chat/issues/8312) ([095de57](https://github.com/lobehub/lobe-chat/commit/095de57))
+
+</details>
+
+<div align="right">
+
+[![](https://img.shields.io/badge/-BACK_TO_TOP-151515?style=flat-square)](#readme-top)
+
+</div>
+
+### [Version 1.98.2](https://github.com/lobehub/lobe-chat/compare/v1.98.1...v1.98.2)
+
+<sup>Released on **2025-07-14**</sup>
+
+#### 💄 Styles
+
+- **misc**: Update i18n.
+
+<br/>
+
+<details>
+<summary><kbd>Improvements and Fixes</kbd></summary>
+
+#### Styles
+
+- **misc**: Update i18n, closes [#8422](https://github.com/lobehub/lobe-chat/issues/8422) ([5b89ec8](https://github.com/lobehub/lobe-chat/commit/5b89ec8))
+
+</details>
+
+<div align="right">
+
+[![](https://img.shields.io/badge/-BACK_TO_TOP-151515?style=flat-square)](#readme-top)
+
+</div>
+
+### [Version 1.98.1](https://github.com/lobehub/lobe-chat/compare/v1.98.0...v1.98.1)
+
+<sup>Released on **2025-07-14**</sup>
+
+#### 💄 Styles
+
+- **misc**: Fix discover translation.
+
+<br/>
+
+<details>
+<summary><kbd>Improvements and Fixes</kbd></summary>
+
+#### Styles
+
+- **misc**: Fix discover translation, closes [#8423](https://github.com/lobehub/lobe-chat/issues/8423) ([15ae35c](https://github.com/lobehub/lobe-chat/commit/15ae35c))
+
+</details>
+
+<div align="right">
+
+[![](https://img.shields.io/badge/-BACK_TO_TOP-151515?style=flat-square)](#readme-top)
+
+</div>
+
+## [Version 1.98.0](https://github.com/lobehub/lobe-chat/compare/v1.97.17...v1.98.0)
+
+<sup>Released on **2025-07-13**</sup>
+
+#### ✨ Features
+
+- **misc**: Add network proxy for desktop.
+
+<br/>
+
+<details>
+<summary><kbd>Improvements and Fixes</kbd></summary>
+
+#### What's improved
+
+- **misc**: Add network proxy for desktop, closes [#7848](https://github.com/lobehub/lobe-chat/issues/7848) ([46d2509](https://github.com/lobehub/lobe-chat/commit/46d2509))
+
+</details>
+
+<div align="right">
+
+[![](https://img.shields.io/badge/-BACK_TO_TOP-151515?style=flat-square)](#readme-top)
+
+</div>
+
+### [Version 1.97.17](https://github.com/lobehub/lobe-chat/compare/v1.97.16...v1.97.17)
+
+<sup>Released on **2025-07-13**</sup>
+
+#### 💄 Styles
+
+- **misc**: Support Hunyuan A13B thinking model.
+
+<br/>
+
+<details>
+<summary><kbd>Improvements and Fixes</kbd></summary>
+
+#### Styles
+
+- **misc**: Support Hunyuan A13B thinking model, closes [#8278](https://github.com/lobehub/lobe-chat/issues/8278) ([09ca978](https://github.com/lobehub/lobe-chat/commit/09ca978))
+
+</details>
+
+<div align="right">
+
+[![](https://img.shields.io/badge/-BACK_TO_TOP-151515?style=flat-square)](#readme-top)
+
+</div>
+
+### [Version 1.97.16](https://github.com/lobehub/lobe-chat/compare/v1.97.15...v1.97.16)
+
+<sup>Released on **2025-07-13**</sup>
+
+#### 💄 Styles
+
+- **misc**: Update i18n.
+
+<br/>
+
+<details>
+<summary><kbd>Improvements and Fixes</kbd></summary>
+
+#### Styles
+
+- **misc**: Update i18n, closes [#8410](https://github.com/lobehub/lobe-chat/issues/8410) ([2515875](https://github.com/lobehub/lobe-chat/commit/2515875))
+
+</details>
+
+<div align="right">
+
+[![](https://img.shields.io/badge/-BACK_TO_TOP-151515?style=flat-square)](#readme-top)
+
+</div>
+
+### [Version 1.97.15](https://github.com/lobehub/lobe-chat/compare/v1.97.14...v1.97.15)
+
+<sup>Released on **2025-07-12**</sup>
+
+#### 🐛 Bug Fixes
+
+- **misc**: Add vision support to Grok 4.
+
+<br/>
+
+<details>
+<summary><kbd>Improvements and Fixes</kbd></summary>
+
+#### What's fixed
+
+- **misc**: Add vision support to Grok 4, closes [#8386](https://github.com/lobehub/lobe-chat/issues/8386) ([8512f5a](https://github.com/lobehub/lobe-chat/commit/8512f5a))
+
+</details>
+
+<div align="right">
+
+[![](https://img.shields.io/badge/-BACK_TO_TOP-151515?style=flat-square)](#readme-top)
+
+</div>
+
 ### [Version 1.97.14](https://github.com/lobehub/lobe-chat/compare/v1.97.13...v1.97.14)
 
 <sup>Released on **2025-07-12**</sup>
