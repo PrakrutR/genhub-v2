@@ -2,6 +2,106 @@
 
 # GenHub Changelog
 
+### [Version 1.107.1](https://github.com/lobehub/lobe-chat/compare/v1.107.0...v1.107.1)
+
+<sup>Released on **2025-08-01**</sup>
+
+#### 💄 Styles
+
+- **misc**: Update i18n.
+
+<br/>
+
+<details>
+<summary><kbd>Improvements and Fixes</kbd></summary>
+
+#### Styles
+
+- **misc**: Update i18n, closes [#8629](https://github.com/lobehub/lobe-chat/issues/8629) ([3b87fe7](https://github.com/lobehub/lobe-chat/commit/3b87fe7))
+
+</details>
+
+<div align="right">
+
+[![](https://img.shields.io/badge/-BACK_TO_TOP-151515?style=flat-square)](#readme-top)
+
+</div>
+
+## [Version 1.107.0](https://github.com/lobehub/lobe-chat/compare/v1.106.8...v1.107.0)
+
+<sup>Released on **2025-08-01**</sup>
+
+#### ✨ Features
+
+- **misc**: Support aihubmix provider.
+
+<br/>
+
+<details>
+<summary><kbd>Improvements and Fixes</kbd></summary>
+
+#### What's improved
+
+- **misc**: Support aihubmix provider, closes [#8038](https://github.com/lobehub/lobe-chat/issues/8038) ([4db6485](https://github.com/lobehub/lobe-chat/commit/4db6485))
+
+</details>
+
+<div align="right">
+
+[![](https://img.shields.io/badge/-BACK_TO_TOP-151515?style=flat-square)](#readme-top)
+
+</div>
+
+### [Version 1.106.8](https://github.com/lobehub/lobe-chat/compare/v1.106.7...v1.106.8)
+
+<sup>Released on **2025-07-31**</sup>
+
+#### 💄 Styles
+
+- **misc**: Support SenseNova V6.5 models.
+
+<br/>
+
+<details>
+<summary><kbd>Improvements and Fixes</kbd></summary>
+
+#### Styles
+
+- **misc**: Support SenseNova V6.5 models, closes [#8569](https://github.com/lobehub/lobe-chat/issues/8569) ([411ed7e](https://github.com/lobehub/lobe-chat/commit/411ed7e))
+
+</details>
+
+<div align="right">
+
+[![](https://img.shields.io/badge/-BACK_TO_TOP-151515?style=flat-square)](#readme-top)
+
+</div>
+
+### [Version 1.106.7](https://github.com/lobehub/lobe-chat/compare/v1.106.6...v1.106.7)
+
+<sup>Released on **2025-07-31**</sup>
+
+#### 💄 Styles
+
+- **misc**: Update Aliyun Bailian models.
+
+<br/>
+
+<details>
+<summary><kbd>Improvements and Fixes</kbd></summary>
+
+#### Styles
+
+- **misc**: Update Aliyun Bailian models, closes [#8612](https://github.com/lobehub/lobe-chat/issues/8612) ([433e679](https://github.com/lobehub/lobe-chat/commit/433e679))
+
+</details>
+
+<div align="right">
+
+[![](https://img.shields.io/badge/-BACK_TO_TOP-151515?style=flat-square)](#readme-top)
+
+</div>
+
 ### [Version 1.106.6](https://github.com/lobehub/lobe-chat/compare/v1.106.5...v1.106.6)
 
 <sup>Released on **2025-07-31**</sup>
