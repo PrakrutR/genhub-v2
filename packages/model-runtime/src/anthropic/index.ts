@@ -120,7 +120,7 @@ export class LobeAnthropicAI implements LobeRuntimeAI {
       enabledSearch,
     } = payload;
 
-    const { default: anthropicModels } = await import('@/config/aiModels/anthropic');
+    const { anthropic: anthropicModels } = await import('model-bank');
     const modelConfig = anthropicModels.find((m) => m.id === model);
     const defaultMaxOutput = modelConfig?.maxOutput;
 

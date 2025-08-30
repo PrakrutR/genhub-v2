@@ -4,6 +4,7 @@ import { default as ai21 } from './ai21';
 import { default as ai302 } from './ai302';
 import { default as ai360 } from './ai360';
 import { default as aihubmix } from './aihubmix';
+import { default as akashchat } from './akashchat';
 import { default as anthropic } from './anthropic';
 import { default as azure } from './azure';
 import { default as azureai } from './azureai';
@@ -83,6 +84,7 @@ export const LOBE_DEFAULT_MODEL_LIST = buildDefaultModelList({
   ai302,
   ai360,
   aihubmix,
+  akashchat,
   anthropic,
   azure,
   azureai,
@@ -143,6 +145,7 @@ export { default as ai21 } from './ai21';
 export { default as ai302 } from './ai302';
 export { default as ai360 } from './ai360';
 export { default as aihubmix } from './aihubmix';
+export { default as akashchat } from './akashchat';
 export { default as anthropic } from './anthropic';
 export { default as azure } from './azure';
 export { default as azureai } from './azureai';
@@ -152,7 +155,7 @@ export { default as bfl } from './bfl';
 export { default as cloudflare } from './cloudflare';
 export { default as cohere } from './cohere';
 export { default as deepseek } from './deepseek';
-export { default as fal } from './fal';
+export { default as fal, fluxSchnellParamsSchema } from './fal';
 export { default as fireworksai } from './fireworksai';
 export { default as giteeai } from './giteeai';
 export { default as github } from './github';
@@ -173,7 +176,7 @@ export { default as moonshot } from './moonshot';
 export { default as novita } from './novita';
 export { default as nvidia } from './nvidia';
 export { default as ollama } from './ollama';
-export { default as openai } from './openai';
+export { gptImage1ParamsSchema, default as openai, openaiChatModels } from './openai';
 export { default as openrouter } from './openrouter';
 export { default as perplexity } from './perplexity';
 export { default as ppio } from './ppio';
