@@ -1,8 +1,8 @@
-import { authEnv } from '@/config/auth';
-import { fileEnv } from '@/config/file';
 import { enableNextAuth } from '@/const/auth';
 import { isDesktop } from '@/const/version';
 import { appEnv, getAppConfig } from '@/envs/app';
+import { authEnv } from '@/envs/auth';
+import { fileEnv } from '@/envs/file';
 import { knowledgeEnv } from '@/envs/knowledge';
 import { langfuseEnv } from '@/envs/langfuse';
 import { parseSystemAgent } from '@/server/globalConfig/parseSystemAgent';
@@ -39,6 +39,9 @@ export const getServerGlobalConfig = async () => {
       ollama: {
         enabled: isDesktop ? true : undefined,
         fetchOnClient: isDesktop ? false : !process.env.OLLAMA_PROXY_URL,
+      },
+      ollamacloud: {
+        enabledKey: 'ENABLED_OLLAMA_CLOUD',
       },
       qwen: {
         withDeploymentName: true,

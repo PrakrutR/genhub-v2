@@ -1,6 +1,20 @@
 /* eslint-disable sort-keys-fix/sort-keys-fix, typescript-sort-keys/interface */
 // Disable the auto sort key eslint rule to make the code more logic and readable
-import { ChatErrorType, TraceEventType } from '@lobechat/types';
+import {
+  ChatErrorType,
+  ChatImageItem,
+  ChatMessage,
+  ChatMessageError,
+  ChatMessagePluginError,
+  CreateMessageParams,
+  GroundingSearch,
+  MessageMetadata,
+  MessageToolCall,
+  ModelReasoning,
+  TraceEventPayloads,
+  TraceEventType,
+  UpdateMessageRAGParams,
+} from '@lobechat/types';
 import { copyToClipboard } from '@lobehub/ui';
 import isEqual from 'fast-deep-equal';
 import { SWRResponse, mutate } from 'swr';
@@ -12,19 +26,6 @@ import { topicService } from '@/services/topic';
 import { traceService } from '@/services/trace';
 import { ChatStore } from '@/store/chat/store';
 import { messageMapKey } from '@/store/chat/utils/messageMapKey';
-import {
-  ChatMessage,
-  ChatMessageError,
-  ChatMessagePluginError,
-  CreateMessageParams,
-  MessageMetadata,
-  MessageToolCall,
-  ModelReasoning,
-} from '@/types/message';
-import { ChatImageItem } from '@/types/message/image';
-import { UpdateMessageRAGParams } from '@/types/message/rag';
-import { GroundingSearch } from '@/types/search';
-import { TraceEventPayloads } from '@/types/trace';
 import { Action, setNamespace } from '@/utils/storeDebug';
 import { nanoid } from '@/utils/uuid';
 
@@ -71,7 +72,10 @@ export interface ChatMessageAction {
    * update message at the frontend
    * this method will not update messages to database
    */
-  internal_dispatchMessage: (payload: MessageDispatch) => void;
+  internal_dispatchMessage: (
+    payload: MessageDispatch,
+    context?: { topicId?: string | null; sessionId: string },
+  ) => void;
 
   /**
    * update the message content with optimistic update
@@ -305,14 +309,15 @@ export const chatMessage: StateCreator<
   },
 
   // the internal process method of the AI message
-  internal_dispatchMessage: (payload) => {
-    const { activeId } = get();
+  internal_dispatchMessage: (payload, context) => {
+    const activeId = typeof context !== 'undefined' ? context.sessionId : get().activeId;
+    const topicId = typeof context !== 'undefined' ? context.topicId : get().activeTopicId;
 
-    if (!activeId) return;
+    const messagesKey = messageMapKey(activeId, topicId);
 
-    const messages = messagesReducer(chatSelectors.activeBaseChats(get()), payload);
+    const messages = messagesReducer(chatSelectors.getBaseChatsByKey(messagesKey)(get()), payload);
 
-    const nextMap = { ...get().messagesMap, [chatSelectors.currentChatKey(get())]: messages };
+    const nextMap = { ...get().messagesMap, [messagesKey]: messages };
 
     if (isEqual(nextMap, get().messagesMap)) return;
 
