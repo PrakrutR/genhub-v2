@@ -9,7 +9,7 @@ import { AsyncLocalStorage } from '@/utils/localStorage';
 export enum SidebarTabKey {
   Chat = 'chat',
   Discover = 'discover',
-  Files = 'files',
+  Files = 'knowledge',
   Image = 'image',
   Me = 'me',
   Setting = 'settings',
@@ -50,6 +50,7 @@ export enum ProfileTabs {
   Profile = 'profile',
   Security = 'security',
   Stats = 'stats',
+  Usage = 'usage',
 }
 
 export interface SystemStatus {
@@ -71,6 +72,7 @@ export interface SystemStatus {
    */
   isEnablePglite?: boolean;
   isShowCredit?: boolean;
+  knowledgeBaseModalViewMode?: 'list' | 'masonry';
   language?: LocaleMode;
   /**
    * 记住用户最后选择的图像生成模型
@@ -98,6 +100,10 @@ export interface SystemStatus {
    * theme mode
    */
   themeMode?: ThemeMode;
+  /**
+   * 是否使用短格式显示 token
+   */
+  tokenDisplayFormatShort?: boolean;
   zenMode?: boolean;
 }
 
@@ -137,6 +143,7 @@ export const INITIAL_STATUS = {
   hideThreadLimitAlert: false,
   imagePanelWidth: 320,
   imageTopicPanelWidth: 80,
+  knowledgeBaseModalViewMode: 'list' as const,
   mobileShowTopic: false,
   noWideScreen: true,
   portalWidth: 400,
@@ -150,6 +157,7 @@ export const INITIAL_STATUS = {
   showSystemRole: false,
   systemRoleExpandedMap: {},
   themeMode: 'auto',
+  tokenDisplayFormatShort: true,
   zenMode: false,
 } satisfies SystemStatus;
 
