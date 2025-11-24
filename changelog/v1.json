@@ -1,6 +1,65 @@
 [
   {
     "children": {
+      "improvements": ["Add Kimi K2 Thinking to Qwen Provider."]
+    },
+    "date": "2025-11-24",
+    "version": "2.0.0-next.112"
+  },
+  {
+    "children": {
+      "fixes": [
+        "Fix db migration snapshot not align with db schema, Separate agent file injection from knowledge base RAG search."
+      ]
+    },
+    "date": "2025-11-24",
+    "version": "2.0.0-next.111"
+  },
+  {
+    "children": {
+      "improvements": [
+        "Add hyperlink to each topic & pinned agent, support ContextMenu on ChatItem."
+      ]
+    },
+    "date": "2025-11-24",
+    "version": "2.0.0-next.110"
+  },
+  {
+    "children": {
+      "fixes": ["Fixed the knowledge files cant open error."],
+      "improvements": ["Update i18n."]
+    },
+    "date": "2025-11-24",
+    "version": "2.0.0-next.109"
+  },
+  {
+    "children": {
+      "fixes": ["Fixed the pinned session not work."]
+    },
+    "date": "2025-11-24",
+    "version": "2.0.0-next.108"
+  },
+  {
+    "children": {
+      "improvements": ["Optimize nana banana pro error message."]
+    },
+    "date": "2025-11-23",
+    "version": "2.0.0-next.107"
+  },
+  {
+    "children": {
+      "features": ["Add nano-banana-pro model support and optimization."]
+    },
+    "date": "2025-11-23",
+    "version": "2.0.0-next.106"
+  },
+  {
+    "children": {},
+    "date": "2025-11-23",
+    "version": "2.0.0-next.105"
+  },
+  {
+    "children": {
       "improvements": ["Update i18n."]
     },
     "date": "2025-11-22",

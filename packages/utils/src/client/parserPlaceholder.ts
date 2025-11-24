@@ -86,7 +86,7 @@ export const VARIABLE_GENERATORS = {
   random_digit: () => Math.floor(Math.random() * 10).toString(),
 
   /**
-   * UUID 类模板变量
+   * UUID-type template variables
    *
    * | Value | Example |
    * |-------|---------|
