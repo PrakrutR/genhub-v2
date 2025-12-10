@@ -1,5 +1,6 @@
 import { getMessageError } from '@lobechat/fetch-sse';
 
+import { isDeprecatedEdition } from '@/const/version';
 import { createHeaderWithAuth } from '@/services/_auth';
 import { aiProviderSelectors, getAiInfraStoreState } from '@/store/aiInfra';
 import { ChatModelCard } from '@/types/llm';

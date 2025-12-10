@@ -34,27 +34,31 @@ Experience advanced AI conversations at **[genhub.app](https://www.genhub.app/)*
 
 #### TOC
 
-- [👋🏻 Getting Started](#-getting-started)
-- [✨ Features](#-features)
-  - [`1` \[Chain of Thought\]\[docs-feat-cot\]](#1-chain-of-thoughtdocs-feat-cot)
-  - [`2` \[Branching Conversations\]\[docs-feat-branch\]](#2-branching-conversationsdocs-feat-branch)
-  - [`3` \[Artifacts Support\]\[docs-feat-artifacts\]](#3-artifacts-supportdocs-feat-artifacts)
-  - [`4` \[File Upload /Knowledge Base\]\[docs-feat-knowledgebase\]](#4-file-upload-knowledge-basedocs-feat-knowledgebase)
-  - [`5` \[Multi-Model Service Provider Support\]\[docs-feat-provider\]](#5-multi-model-service-provider-supportdocs-feat-provider)
-  - [`6` \[Local Large Language Model (LLM) Support\]\[docs-feat-local\]](#6-local-large-language-model-llm-supportdocs-feat-local)
-  - [`7` \[Model Visual Recognition\]\[docs-feat-vision\]](#7-model-visual-recognitiondocs-feat-vision)
-  - [`8` \[TTS & STT Voice Conversation\]\[docs-feat-tts\]](#8-tts--stt-voice-conversationdocs-feat-tts)
-  - [`9` \[Text to Image Generation\]\[docs-feat-t2i\]](#9-text-to-image-generationdocs-feat-t2i)
-  - [`10` \[Plugin System (Function Calling)\]\[docs-feat-plugin\]](#10-plugin-system-function-callingdocs-feat-plugin)
-  - [`11` \[Agent Market (GPTs)\]\[docs-feat-agent\]](#11-agent-market-gptsdocs-feat-agent)
-  - [`12` \[Support Local / Remote Database\]\[docs-feat-database\]](#12-support-local--remote-databasedocs-feat-database)
-  - [`13` \[Support Multi-User Management\]\[docs-feat-auth\]](#13-support-multi-user-managementdocs-feat-auth)
-  - [`14` \[Progressive Web App (PWA)\]\[docs-feat-pwa\]](#14-progressive-web-app-pwadocs-feat-pwa)
-  - [`15` \[Mobile Device Adaptation\]\[docs-feat-mobile\]](#15-mobile-device-adaptationdocs-feat-mobile)
-  - [`16` \[Custom Themes\]\[docs-feat-theme\]](#16-custom-themesdocs-feat-theme)
-  - [`*` What's more](#-whats-more)
-- [⚡️ Performance](#️-performance)
-- [🧩 Plugins](#-plugins)
+- [GenHub](#genhub)
+      - [TOC](#toc)
+      - [](#)
+  - [👋🏻 Getting Started](#-getting-started)
+  - [✨ Features](#-features)
+    - [`1` \[Chain of Thought\]\[docs-feat-cot\]](#1-chain-of-thoughtdocs-feat-cot)
+    - [`2` \[Branching Conversations\]\[docs-feat-branch\]](#2-branching-conversationsdocs-feat-branch)
+    - [`3` \[Artifacts Support\]\[docs-feat-artifacts\]](#3-artifacts-supportdocs-feat-artifacts)
+    - [`4` \[File Upload /Knowledge Base\]\[docs-feat-knowledgebase\]](#4-file-upload-knowledge-basedocs-feat-knowledgebase)
+    - [`5` \[Multi-Model Service Provider Support\]\[docs-feat-provider\]](#5-multi-model-service-provider-supportdocs-feat-provider)
+      - [Supported Model Service Providers](#supported-model-service-providers)
+    - [`6` \[Local Large Language Model (LLM) Support\]\[docs-feat-local\]](#6-local-large-language-model-llm-supportdocs-feat-local)
+    - [`7` \[Model Visual Recognition\]\[docs-feat-vision\]](#7-model-visual-recognitiondocs-feat-vision)
+    - [`8` \[TTS \& STT Voice Conversation\]\[docs-feat-tts\]](#8-tts--stt-voice-conversationdocs-feat-tts)
+    - [`9` \[Text to Image Generation\]\[docs-feat-t2i\]](#9-text-to-image-generationdocs-feat-t2i)
+    - [`10` \[Plugin System (Function Calling)\]\[docs-feat-plugin\]](#10-plugin-system-function-callingdocs-feat-plugin)
+    - [`11` \[Agent Market (GPTs)\]\[docs-feat-agent\]](#11-agent-market-gptsdocs-feat-agent)
+    - [`12` \[Support Local / Remote Database\]\[docs-feat-database\]](#12-support-local--remote-databasedocs-feat-database)
+    - [`13` \[Support Multi-User Management\]\[docs-feat-auth\]](#13-support-multi-user-managementdocs-feat-auth)
+    - [`14` \[Progressive Web App (PWA)\]\[docs-feat-pwa\]](#14-progressive-web-app-pwadocs-feat-pwa)
+    - [`15` \[Mobile Device Adaptation\]\[docs-feat-mobile\]](#15-mobile-device-adaptationdocs-feat-mobile)
+    - [`16` \[Custom Themes\]\[docs-feat-theme\]](#16-custom-themesdocs-feat-theme)
+    - [`*` What's more](#-whats-more)
+  - [⚡️ Performance](#️-performance)
+  - [🧩 Plugins](#-plugins)
 
 ####
 
@@ -263,6 +267,12 @@ In addition, these plugins are not limited to news aggregation, but can also ext
 | [PortfolioMeta](https://lobechat.com/discover/plugin/StockData)<br/><sup>By **portfoliometa** on **2025-11-28**</sup>       | Analyze stocks and get comprehensive real-time investment data and analytics.<br/>`stock`                                                 |
 | [SEO](https://lobechat.com/discover/plugin/SEO)<br/><sup>By **orrenprunckun** on **2025-11-14**</sup>                       | Enter any URL and keyword and get an On-Page SEO analysis & insights!<br/>`seo`                                                           |
 | [Shopping tools](https://lobechat.com/discover/plugin/ShoppingTools)<br/><sup>By **shoppingtools** on **2025-10-27**</sup>  | Search for products on eBay & AliExpress, find eBay events & coupons. Get prompt examples.<br/>`shopping` `e-bay` `ali-express` `coupons` |
+| Recent Submits                                                                                                             | Description                                                                                                                               |
+| -------------------------------------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------- |
+| [PortfolioMeta](https://lobechat.com/discover/plugin/StockData)<br/><sup>By **portfoliometa** on **2025-11-28**</sup>      | Analyze stocks and get comprehensive real-time investment data and analytics.<br/>`stock`                                                 |
+| [SEO](https://lobechat.com/discover/plugin/SEO)<br/><sup>By **orrenprunckun** on **2025-11-14**</sup>                      | Enter any URL and keyword and get an On-Page SEO analysis & insights!<br/>`seo`                                                           |
+| [Shopping tools](https://lobechat.com/discover/plugin/ShoppingTools)<br/><sup>By **shoppingtools** on **2025-10-27**</sup> | Search for products on eBay & AliExpress, find eBay events & coupons. Get prompt examples.<br/>`shopping` `e-bay` `ali-express` `coupons` |
+| [Web](https://lobechat.com/discover/plugin/web)<br/><sup>By **Proghit** on **2025-01-24**</sup>                            | Smart web search that reads and analyzes pages to deliver comprehensive answers from Google results.<br/>`web` `search`                   |
 
 > 📊 Total plugins: [<kbd>**41**</kbd>](https://lobechat.com/discover/plugins)
 
