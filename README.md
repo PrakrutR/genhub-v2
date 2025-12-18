@@ -261,20 +261,14 @@ In addition, these plugins are not limited to news aggregation, but can also ext
 
 <!-- PLUGIN LIST -->
 
-| Recent Submits                                                                                                              | Description                                                                                                                               |
-| --------------------------------------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------- |
-| [AladinBooks](https://lobechat.com/discover/plugin/AladinSearchBooks)<br/><sup>By **azurewebsites** on **2025-12-08**</sup> | Search for books on Aladin.<br/>`book` `search`                                                                                           |
-| [PortfolioMeta](https://lobechat.com/discover/plugin/StockData)<br/><sup>By **portfoliometa** on **2025-11-28**</sup>       | Analyze stocks and get comprehensive real-time investment data and analytics.<br/>`stock`                                                 |
-| [SEO](https://lobechat.com/discover/plugin/SEO)<br/><sup>By **orrenprunckun** on **2025-11-14**</sup>                       | Enter any URL and keyword and get an On-Page SEO analysis & insights!<br/>`seo`                                                           |
-| [Shopping tools](https://lobechat.com/discover/plugin/ShoppingTools)<br/><sup>By **shoppingtools** on **2025-10-27**</sup>  | Search for products on eBay & AliExpress, find eBay events & coupons. Get prompt examples.<br/>`shopping` `e-bay` `ali-express` `coupons` |
-| Recent Submits                                                                                                             | Description                                                                                                                               |
-| -------------------------------------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------- |
-| [PortfolioMeta](https://lobechat.com/discover/plugin/StockData)<br/><sup>By **portfoliometa** on **2025-11-28**</sup>      | Analyze stocks and get comprehensive real-time investment data and analytics.<br/>`stock`                                                 |
-| [SEO](https://lobechat.com/discover/plugin/SEO)<br/><sup>By **orrenprunckun** on **2025-11-14**</sup>                      | Enter any URL and keyword and get an On-Page SEO analysis & insights!<br/>`seo`                                                           |
-| [Shopping tools](https://lobechat.com/discover/plugin/ShoppingTools)<br/><sup>By **shoppingtools** on **2025-10-27**</sup> | Search for products on eBay & AliExpress, find eBay events & coupons. Get prompt examples.<br/>`shopping` `e-bay` `ali-express` `coupons` |
-| [Web](https://lobechat.com/discover/plugin/web)<br/><sup>By **Proghit** on **2025-01-24**</sup>                            | Smart web search that reads and analyzes pages to deliver comprehensive answers from Google results.<br/>`web` `search`                   |
+| Recent Submits                                                                                                          | Description                                                                                                                                        |
+| ----------------------------------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------- |
+| [Video Captions](https://lobechat.com/discover/plugin/VideoCaptions)<br/><sup>By **maila** on **2025-12-13**</sup>      | Convert Youtube links into transcribed text, enable asking questions, create chapters, and summarize its content.<br/>`video-to-text` `youtube`    |
+| [WeatherGPT](https://lobechat.com/discover/plugin/WeatherGPT)<br/><sup>By **steven-tey** on **2025-12-13**</sup>        | Get current weather information for a specific location.<br/>`weather`                                                                             |
+| [Git OSS Stats](https://lobechat.com/discover/plugin/gitUserRepoStats)<br/><sup>By **yunwei37** on **2025-12-13**</sup> | Dynamically generate and analyze stats and history for OSS repos and developers.<br/>`github` `oss`                                                |
+| [Questmate Forms](https://lobechat.com/discover/plugin/questmate)<br/><sup>By **questmate** on **2025-12-13**</sup>     | Create forms, checklists and workflows (we call 'em Quests!) that you can assign, schedule or make public.<br/>`forms` `checklists` `productivity` |
 
-> 📊 Total plugins: [<kbd>**37**</kbd>](https://lobechat.com/discover/plugins)
+> 📊 Total plugins: [<kbd>**39**</kbd>](https://lobechat.com/discover/plugins)
 
  <!-- PLUGIN LIST -->
 
@@ -313,7 +307,7 @@ Our marketplace is not just a showcase platform but also a collaborative space. 
 | [Gourmet Reviewer🍟](https://lobechat.com/discover/assistant/food-reviewer)<br/><sup>By **[renhai-lab](https://github.com/renhai-lab)** on **2025-06-17**</sup>                | Food critique expert<br/>`gourmet` `review` `writing`                                                                                                                                                                    |
 | [Minecraft Senior Developer](https://lobechat.com/discover/assistant/java-development)<br/><sup>By **[iamyuuk](https://github.com/iamyuuk)** on **2025-06-17**</sup>           | Expert in advanced Java development and Minecraft mod and server plugin development<br/>`development` `programming` `minecraft` `java`                                                                                   |
 
-> 📊 Total agents: [<kbd>**505**</kbd> ](https://lobechat.com/discover/assistants)
+> 📊 Total agents: [<kbd>**505**</kbd>](https://lobechat.com/discover/assistants)
 
  <!-- AGENT LIST -->
 
@@ -482,5 +476,17 @@ Visit **[genhub.app](https://www.genhub.app/)** to get started
 
 ---
 
-Copyright © 2025 GenHub. <br />
-This project is [Apache 2.0](./LICENSE) licensed.
+<details><summary><h4>📝 License</h4></summary>
+
+[![][fossa-license-shield]][fossa-license-link]
+
+</details>
+
+Copyright © 2025 [LobeHub][profile-link]. <br />
+This project is [LobeHub Community License](./LICENSE) licensed.
+
+<!-- LINK GROUP -->
+
+[fossa-license-link]: https://app.fossa.com/projects/git%2Bgithub.com%2Flobehub%2Flobe-chat
+[fossa-license-shield]: https://app.fossa.com/api/projects/git%2Bgithub.com%2Flobehub%2Flobe-chat.svg?type=large
+[profile-link]: https://github.com/lobehub

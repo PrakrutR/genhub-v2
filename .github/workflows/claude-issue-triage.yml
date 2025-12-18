@@ -8,8 +8,8 @@ jobs:
   triage-issue:
     runs-on: ubuntu-latest
     timeout-minutes: 10
-    # Only run on issue opened, or when "trigger:triage" label is added
-    if: github.event.action == 'opened' || (github.event.action == 'labeled' && github.event.label.name == 'trigger:triage')
+    # Only run on issue opened, or when "trigger:triage" label is added, and strictly on the genhub-v2 repo
+    if: github.repository == 'PrakrutR/genhub-v2' && (github.event.action == 'opened' || (github.event.action == 'labeled' && github.event.label.name == 'trigger:triage'))
     permissions:
       contents: read
       issues: write
