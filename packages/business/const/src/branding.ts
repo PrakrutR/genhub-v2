@@ -34,6 +34,6 @@ export const BRANDING_EMAIL = {
   support: 'support@genhub.app',
 };
 
-export const BRANDING_PROVIDER = 'lobehub';
+export const BRANDING_PROVIDER = 'GenHub';
 
 export const COPYRIGHT = `© ${new Date().getFullYear()} ${ORG_NAME}`;
