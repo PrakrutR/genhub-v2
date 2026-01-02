@@ -12,7 +12,7 @@ const styles = createStaticStyles(({ css, cssVar }) => ({
     width: 40px;
     height: 40px;
   `,
-  cardBox: css`
+  card: css`
     border-radius: ${cssVar.borderRadiusLG}px;
     background: ${cssVar.colorBgContainer};
     box-shadow: 0 0 0 1px ${cssVar.colorBorderSecondary};
@@ -28,7 +28,7 @@ const styles = createStaticStyles(({ css, cssVar }) => ({
   `,
   modalContent: css`
     &.${prefixCls}-modalContent {
-      .${prefixCls}-cardBox {
+      .${prefixCls}-card {
         border: 1px solid ${cssVar.colorSplit} !important;
         border-radius: ${cssVar.borderRadiusLG}px !important;
         box-shadow: ${cssVar.boxShadow} !important;
@@ -64,7 +64,7 @@ const styles = createStaticStyles(({ css, cssVar }) => ({
       width: 100%;
       height: 100%;
 
-      .${prefixCls}-cardBox {
+      .${prefixCls}-card {
         width: 100%;
         height: 100%;
         border: unset;
