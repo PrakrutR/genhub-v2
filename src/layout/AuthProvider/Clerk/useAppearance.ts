@@ -32,6 +32,7 @@ const styles = createStaticStyles(({ css, cssVar }) => ({
         border: 1px solid ${cssVar.colorSplit} !important;
         border-radius: ${cssVar.borderRadiusLG}px !important;
         box-shadow: ${cssVar.boxShadow} !important;
+        background: ${cssVar.colorBgContainer} !important;
       }
 
       .${prefixCls}-userProfile-root {
