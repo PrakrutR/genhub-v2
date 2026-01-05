@@ -3,7 +3,9 @@
 import { dark } from '@clerk/themes';
 import { type ElementsConfig, type Theme } from '@clerk/types';
 import { BRANDING_URL } from '@lobechat/business-const';
-import { createStaticStyles, cssVar, cx, useThemeMode } from 'antd-style';
+import { createStaticStyles, cssVar, cx } from 'antd-style';
+
+import { useIsDark } from '@/hooks/useIsDark';
 
 const prefixCls = 'cl';
 
@@ -96,7 +98,7 @@ const styles = createStaticStyles(({ css, cssVar }) => ({
 })) as Partial<Record<keyof ElementsConfig, any>>;
 
 export const useAppearance = () => {
-  const { isDarkMode } = useThemeMode();
+  const isDarkMode = useIsDark();
 
   const navbarStyle = cx(styles.navbar, isDarkMode && (styles as any).navbar_dark);
   const scrollBoxStyle = cx(styles.scrollBox, isDarkMode && (styles as any).scrollBox_dark);
