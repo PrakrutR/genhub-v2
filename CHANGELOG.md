@@ -102,6 +102,241 @@
 
 </div>
 
+## [Version 2.0.0-next.285](https://github.com/lobehub/lobe-chat/compare/v2.0.0-next.284...v2.0.0-next.285)
+
+<sup>Released on **2026-01-14**</sup>
+
+#### ✨ Features
+
+- **misc**: Update the agent profiles tools check & agentbuilder tools & publish to market button.
+
+<br/>
+
+<details>
+<summary><kbd>Improvements and Fixes</kbd></summary>
+
+#### What's improved
+
+- **misc**: Update the agent profiles tools check & agentbuilder tools & publish to market button, closes [#11501](https://github.com/lobehub/lobe-chat/issues/11501) ([85277fa](https://github.com/lobehub/lobe-chat/commit/85277fa))
+
+</details>
+
+<div align="right">
+
+[![](https://img.shields.io/badge/-BACK_TO_TOP-151515?style=flat-square)](#readme-top)
+
+</div>
+
+## [Version 2.0.0-next.284](https://github.com/lobehub/lobe-chat/compare/v2.0.0-next.283...v2.0.0-next.284)
+
+<sup>Released on **2026-01-14**</sup>
+
+#### ♻ Code Refactoring
+
+- **misc**: Remove the old lobehub plugins.
+
+#### 🐛 Bug Fixes
+
+- **misc**: Slove the settings/profile change but not refresh the profiles.
+
+<br/>
+
+<details>
+<summary><kbd>Improvements and Fixes</kbd></summary>
+
+#### Code refactoring
+
+- **misc**: Remove the old lobehub plugins, closes [#11498](https://github.com/lobehub/lobe-chat/issues/11498) ([e5b47df](https://github.com/lobehub/lobe-chat/commit/e5b47df))
+
+#### What's fixed
+
+- **misc**: Slove the settings/profile change but not refresh the profiles, closes [#11497](https://github.com/lobehub/lobe-chat/issues/11497) ([f1e2111](https://github.com/lobehub/lobe-chat/commit/f1e2111))
+
+</details>
+
+<div align="right">
+
+[![](https://img.shields.io/badge/-BACK_TO_TOP-151515?style=flat-square)](#readme-top)
+
+</div>
+
+## [Version 2.0.0-next.283](https://github.com/lobehub/lobe-chat/compare/v2.0.0-next.282...v2.0.0-next.283)
+
+<sup>Released on **2026-01-14**</sup>
+
+#### 💄 Styles
+
+- **misc**: Fix UI issues with tooltip wrapping and dropdown type.
+
+<br/>
+
+<details>
+<summary><kbd>Improvements and Fixes</kbd></summary>
+
+#### Styles
+
+- **misc**: Fix UI issues with tooltip wrapping and dropdown type, closes [#11495](https://github.com/lobehub/lobe-chat/issues/11495) ([9d90eba](https://github.com/lobehub/lobe-chat/commit/9d90eba))
+
+</details>
+
+<div align="right">
+
+[![](https://img.shields.io/badge/-BACK_TO_TOP-151515?style=flat-square)](#readme-top)
+
+</div>
+
+## [Version 2.0.0-next.282](https://github.com/lobehub/lobe-chat/compare/v2.0.0-next.281...v2.0.0-next.282)
+
+<sup>Released on **2026-01-14**</sup>
+
+#### 💄 Styles
+
+- **misc**: Update readFile content.
+
+<br/>
+
+<details>
+<summary><kbd>Improvements and Fixes</kbd></summary>
+
+#### Styles
+
+- **misc**: Update readFile content, closes [#11485](https://github.com/lobehub/lobe-chat/issues/11485) ([050499b](https://github.com/lobehub/lobe-chat/commit/050499b))
+
+</details>
+
+<div align="right">
+
+[![](https://img.shields.io/badge/-BACK_TO_TOP-151515?style=flat-square)](#readme-top)
+
+</div>
+
+## [Version 2.0.0-next.281](https://github.com/lobehub/lobe-chat/compare/v2.0.0-next.280...v2.0.0-next.281)
+
+<sup>Released on **2026-01-14**</sup>
+
+#### 🐛 Bug Fixes
+
+- **misc**: Fix group ux and memory retriever.
+
+<br/>
+
+<details>
+<summary><kbd>Improvements and Fixes</kbd></summary>
+
+#### What's fixed
+
+- **misc**: Fix group ux and memory retriever, closes [#11481](https://github.com/lobehub/lobe-chat/issues/11481) ([033ca92](https://github.com/lobehub/lobe-chat/commit/033ca92))
+
+</details>
+
+<div align="right">
+
+[![](https://img.shields.io/badge/-BACK_TO_TOP-151515?style=flat-square)](#readme-top)
+
+</div>
+
+## [Version 2.0.0-next.280](https://github.com/lobehub/lobe-chat/compare/v2.0.0-next.279...v2.0.0-next.280)
+
+<sup>Released on **2026-01-13**</sup>
+
+#### 💄 Styles
+
+- **misc**: Add MiniMax-M2.1 and GLM-4.7 for Qiniu provider.
+
+<br/>
+
+<details>
+<summary><kbd>Improvements and Fixes</kbd></summary>
+
+#### Styles
+
+- **misc**: Add MiniMax-M2.1 and GLM-4.7 for Qiniu provider, closes [#10982](https://github.com/lobehub/lobe-chat/issues/10982) ([695784d](https://github.com/lobehub/lobe-chat/commit/695784d))
+
+</details>
+
+<div align="right">
+
+[![](https://img.shields.io/badge/-BACK_TO_TOP-151515?style=flat-square)](#readme-top)
+
+</div>
+
+## [Version 2.0.0-next.279](https://github.com/lobehub/lobe-chat/compare/v2.0.0-next.278...v2.0.0-next.279)
+
+<sup>Released on **2026-01-13**</sup>
+
+#### 🐛 Bug Fixes
+
+- **misc**: Fix new topic flick issue, fix thread portal not open correctly.
+
+<br/>
+
+<details>
+<summary><kbd>Improvements and Fixes</kbd></summary>
+
+#### What's fixed
+
+- **misc**: Fix new topic flick issue, closes [#11473](https://github.com/lobehub/lobe-chat/issues/11473) ([c53d372](https://github.com/lobehub/lobe-chat/commit/c53d372))
+- **misc**: Fix thread portal not open correctly, closes [#11475](https://github.com/lobehub/lobe-chat/issues/11475) ([e6ff90b](https://github.com/lobehub/lobe-chat/commit/e6ff90b))
+
+</details>
+
+<div align="right">
+
+[![](https://img.shields.io/badge/-BACK_TO_TOP-151515?style=flat-square)](#readme-top)
+
+</div>
+
+## [Version 2.0.0-next.278](https://github.com/lobehub/lobe-chat/compare/v2.0.0-next.277...v2.0.0-next.278)
+
+<sup>Released on **2026-01-13**</sup>
+
+#### ✨ Features
+
+- **share**: Add topic sharing functionality.
+
+<br/>
+
+<details>
+<summary><kbd>Improvements and Fixes</kbd></summary>
+
+#### What's improved
+
+- **share**: Add topic sharing functionality, closes [#11448](https://github.com/lobehub/lobe-chat/issues/11448) ([ddca165](https://github.com/lobehub/lobe-chat/commit/ddca165))
+
+</details>
+
+<div align="right">
+
+[![](https://img.shields.io/badge/-BACK_TO_TOP-151515?style=flat-square)](#readme-top)
+
+</div>
+
+## [Version 2.0.0-next.277](https://github.com/lobehub/lobe-chat/compare/v2.0.0-next.276...v2.0.0-next.277)
+
+<sup>Released on **2026-01-13**</sup>
+
+#### ✨ Features
+
+- **misc**: Update the community user layout action button, update the cron job visiual way.
+
+<br/>
+
+<details>
+<summary><kbd>Improvements and Fixes</kbd></summary>
+
+#### What's improved
+
+- **misc**: Update the community user layout action button, closes [#11472](https://github.com/lobehub/lobe-chat/issues/11472) ([2dd6d42](https://github.com/lobehub/lobe-chat/commit/2dd6d42))
+- **misc**: Update the cron job visiual way, closes [#11466](https://github.com/lobehub/lobe-chat/issues/11466) ([63d81de](https://github.com/lobehub/lobe-chat/commit/63d81de))
+
+</details>
+
+<div align="right">
+
+[![](https://img.shields.io/badge/-BACK_TO_TOP-151515?style=flat-square)](#readme-top)
+
+</div>
+
 ## [Version 2.0.0-next.276](https://github.com/lobehub/lobe-chat/compare/v2.0.0-next.275...v2.0.0-next.276)
 
 <sup>Released on **2026-01-13**</sup>
