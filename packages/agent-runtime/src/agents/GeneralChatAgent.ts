@@ -88,10 +88,22 @@ export class GeneralChatAgent implements Agent {
       }
 
       // Priority 0: CRITICAL - Check security blacklist FIRST
-      // This overrides ALL other settings, including auto-run mode
       const securityCheck = InterventionChecker.checkSecurityBlacklist(securityBlacklist, toolArgs);
+
+      // Priority 0.5: Headless mode - fully automated for async tasks
+      // In headless mode: blacklisted tools are skipped, all other tools execute directly
+      if (approvalMode === 'headless') {
+        if (securityCheck.blocked) {
+          // Skip blacklisted tools entirely (don't execute, don't wait for approval)
+          continue;
+        }
+        // All other tools execute directly
+        toolsToExecute.push(toolCalling);
+        continue;
+      }
+
+      // For non-headless modes: security blacklist requires intervention
       if (securityCheck.blocked) {
-        // Security blacklist always requires intervention
         toolsNeedingIntervention.push(toolCalling);
         continue;
       }
@@ -347,6 +359,30 @@ export class GeneralChatAgent implements Agent {
               type: 'exec_tasks',
             };
           }
+
+          // GTD client-side async task (single, desktop only)
+          if (stateType === 'execClientTask') {
+            const { parentMessageId: execParentId, task } = data.state as {
+              parentMessageId: string;
+              task: any;
+            };
+            return {
+              payload: { parentMessageId: execParentId, task },
+              type: 'exec_client_task',
+            };
+          }
+
+          // GTD client-side async tasks (multiple, desktop only)
+          if (stateType === 'execClientTasks') {
+            const { parentMessageId: execParentId, tasks } = data.state as {
+              parentMessageId: string;
+              tasks: any[];
+            };
+            return {
+              payload: { parentMessageId: execParentId, tasks },
+              type: 'exec_client_tasks',
+            };
+          }
         }
 
         // Check if there are still pending tool messages waiting for approval
@@ -433,10 +469,22 @@ export class GeneralChatAgent implements Agent {
         // Async tasks batch completed, continue to call LLM with results
         const { parentMessageId } = context.payload as TasksBatchResultPayload;
 
+        // Inject a virtual user message to force the model to summarize or continue
+        // This fixes an issue where some models (e.g., Kimi K2) return empty content
+        // when the last message is a task result, thinking the task is already done
+        const messagesWithPrompt = [
+          ...state.messages,
+          {
+            content:
+              'All tasks above have been completed. Please summarize the results or continue with your response following user query language.',
+            role: 'user' as const,
+          },
+        ];
+
         // Continue to call LLM with updated messages (task messages are already in state)
         return {
           payload: {
-            messages: state.messages,
+            messages: messagesWithPrompt,
             model: this.config.modelRuntimeConfig?.model,
             parentMessageId,
             provider: this.config.modelRuntimeConfig?.provider,

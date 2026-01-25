@@ -8,7 +8,7 @@ export const OFFICIAL_URL = 'https://genhub.app';
 export const OFFICIAL_SITE = 'https://genhub.app';
 export const OFFICIAL_DOMAIN = 'genhub.app';
 
-export const OG_URL = '/og/cover.png?v=4';
+export const OG_URL = '/og/og.webp?v=1';
 
 export const GITHUB = 'https://github.com/PrakrutR/genhub-v2';
 export const GITHUB_ISSUES = urlJoin(GITHUB, 'issues/new/choose');
@@ -65,3 +65,9 @@ export const AES_GCM_URL = 'https://datatracker.ietf.org/doc/html/draft-ietf-avt
 export const BASE_PROVIDER_DOC_URL = 'https://lobehub.com/docs/usage/providers';
 export const SITEMAP_BASE_URL = isDev ? '/sitemap.xml/' : 'sitemap';
 export const CHANGELOG_URL = urlJoin(OFFICIAL_SITE, 'changelog/versions');
+
+export const DOWNLOAD_URL = {
+  android: 'https://play.google.com/store/apps/details?id=com.lobehub.app',
+  default: urlJoin(OFFICIAL_SITE, '/download'),
+  ios: 'https://testflight.apple.com/join/2ZbjX4Qp',
+} as const;

@@ -14,6 +14,7 @@ import { admin, emailOTP, genericOAuth, magicLink } from 'better-auth/plugins';
 import { type BetterAuthPlugin } from 'better-auth/types';
 
 import { businessEmailValidator } from '@/business/server/better-auth';
+import { appEnv } from '@/envs/app';
 import { authEnv } from '@/envs/auth';
 import {
   getMagicLinkEmailTemplate,
@@ -21,6 +22,7 @@ import {
   getVerificationEmailTemplate,
   getVerificationOTPEmailTemplate,
 } from '@/libs/better-auth/email-templates';
+import { emailWhitelist } from '@/libs/better-auth/plugins/email-whitelist';
 import { initBetterAuthSSOProviders } from '@/libs/better-auth/sso';
 import { createSecondaryStorage, getTrustedOrigins } from '@/libs/better-auth/utils/config';
 import { parseSSOProviders } from '@/libs/better-auth/utils/server';
@@ -32,13 +34,13 @@ import { UserService } from '@/server/services/user';
 const VERIFICATION_LINK_EXPIRES_IN = 3600;
 
 /**
- * Safely extract hostname from AUTH_URL for passkey rpID.
- * Returns undefined if AUTH_URL is not set (e.g., in e2e tests).
+ * Safely extract hostname from APP_URL for passkey rpID.
+ * Returns undefined if APP_URL is not set (e.g., in e2e tests).
  */
 const getPasskeyRpID = (): string | undefined => {
-  if (!authEnv.NEXT_PUBLIC_AUTH_URL) return undefined;
+  if (!appEnv.APP_URL) return undefined;
   try {
-    return new URL(authEnv.NEXT_PUBLIC_AUTH_URL).hostname;
+    return new URL(appEnv.APP_URL).hostname;
   } catch {
     return undefined;
   }
@@ -46,19 +48,20 @@ const getPasskeyRpID = (): string | undefined => {
 
 /**
  * Get passkey origins array.
- * Returns undefined if AUTH_URL is not set (e.g., in e2e tests).
+ * Returns undefined if APP_URL is not set (e.g., in e2e tests).
  */
 const getPasskeyOrigins = (): string[] | undefined => {
-  if (!authEnv.NEXT_PUBLIC_AUTH_URL) return undefined;
-  return [
-    // Web origin
-    authEnv.NEXT_PUBLIC_AUTH_URL,
-  ];
+  if (!appEnv.APP_URL) return undefined;
+  try {
+    return [new URL(appEnv.APP_URL).origin];
+  } catch {
+    return undefined;
+  }
 };
 const MAGIC_LINK_EXPIRES_IN = 900;
 // OTP expiration time (in seconds) - 5 minutes for mobile OTP verification
 const OTP_EXPIRES_IN = 300;
-const enableMagicLink = authEnv.ENABLE_MAGIC_LINK;
+const enableMagicLink = authEnv.AUTH_ENABLE_MAGIC_LINK;
 const enabledSSOProviders = parseSSOProviders(authEnv.AUTH_SSO_PROVIDERS);
 
 const { socialProviders, genericOAuthProviders } = initBetterAuthSSOProviders();
@@ -81,8 +84,7 @@ export function defineConfig(customOptions: CustomBetterAuthOptions) {
       },
     },
 
-    // Use renamed env vars (fallback to next-auth vars is handled in src/envs/auth.ts)
-    baseURL: authEnv.NEXT_PUBLIC_AUTH_URL,
+    baseURL: appEnv.APP_URL,
     secret: authEnv.AUTH_SECRET,
     trustedOrigins: getTrustedOrigins(enabledSSOProviders),
 
@@ -221,6 +223,7 @@ export function defineConfig(customOptions: CustomBetterAuthOptions) {
     },
     plugins: [
       ...customOptions.plugins,
+      emailWhitelist(),
       expo(),
       emailHarmony({ allowNormalizedSignin: false, validator: customEmailValidator }),
       admin(),

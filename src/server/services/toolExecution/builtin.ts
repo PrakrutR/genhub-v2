@@ -1,21 +1,25 @@
-import { WebBrowsingManifest } from '@lobechat/builtin-tool-web-browsing';
-import { WebBrowsingExecutionRuntime } from '@lobechat/builtin-tool-web-browsing/executionRuntime';
+import { type LobeChatDatabase } from '@lobechat/database';
 import { type ChatToolPayload } from '@lobechat/types';
 import { safeParseJSON } from '@lobechat/utils';
 import debug from 'debug';
 
-import { LobehubSkillService } from '@/server/services/lobehubSkill';
-import { SearchService } from '@/server/services/search';
+import { KlavisService } from '@/server/services/klavis';
+import { MarketService } from '@/server/services/market';
 
+import { getServerRuntime, hasServerRuntime } from './serverRuntimes';
 import { type IToolExecutor, type ToolExecutionContext, type ToolExecutionResult } from './types';
 
 const log = debug('lobe-server:builtin-tools-executor');
 
-const BuiltinToolServerRuntimes: Record<string, any> = {
-  [WebBrowsingManifest.identifier]: WebBrowsingExecutionRuntime,
-};
-
 export class BuiltinToolsExecutor implements IToolExecutor {
+  private marketService: MarketService;
+  private klavisService: KlavisService;
+
+  constructor(db: LobeChatDatabase, userId: string) {
+    this.marketService = new MarketService({ userInfo: { userId } });
+    this.klavisService = new KlavisService({ db, userId });
+  }
+
   async execute(
     payload: ChatToolPayload,
     context: ToolExecutionContext,
@@ -31,37 +35,33 @@ export class BuiltinToolsExecutor implements IToolExecutor {
       args,
     );
 
-    // Route LobeHub Skills to dedicated service
+    // Route LobeHub Skills to MarketService
     if (source === 'lobehubSkill') {
-      if (!context.serverDB || !context.userId) {
-        return {
-          content: 'Server context not available for LobeHub Skills execution.',
-          error: { code: 'CONTEXT_NOT_AVAILABLE' },
-          success: false,
-        };
-      }
-
-      const skillService = new LobehubSkillService(context.serverDB, context.userId);
-      return skillService.execute({
+      return this.marketService.executeLobehubSkill({
         args,
         provider: identifier,
         toolName: apiName,
       });
     }
 
-    // Default: original builtin runtime logic
-    const ServerRuntime = BuiltinToolServerRuntimes[identifier];
+    // Route Klavis tools to KlavisService
+    if (source === 'klavis') {
+      return this.klavisService.executeKlavisTool({
+        args,
+        identifier,
+        toolName: apiName,
+      });
+    }
 
-    if (!ServerRuntime) {
+    // Use server runtime registry (handles both pre-instantiated and per-request runtimes)
+    if (!hasServerRuntime(identifier)) {
       throw new Error(`Builtin tool "${identifier}" is not implemented`);
     }
 
-    const runtime = new ServerRuntime({
-      searchService: new SearchService(),
-    });
+    const runtime = getServerRuntime(identifier, context);
 
     if (!runtime[apiName]) {
-      throw new Error(`Builtin tool ${identifier} 's ${apiName} is not implemented`);
+      throw new Error(`Builtin tool ${identifier}'s ${apiName} is not implemented`);
     }
 
     try {
@@ -70,7 +70,7 @@ export class BuiltinToolsExecutor implements IToolExecutor {
       const error = e as Error;
       console.error('Error executing builtin tool %s:%s: %O', identifier, apiName, error);
 
-      return { content: error.message, error: error, success: false };
+      return { content: error.message, error, success: false };
     }
   }
 }

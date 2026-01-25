@@ -1,5 +1,6 @@
 import { AssociatedObjectSchema } from '@lobechat/memory-user-memory';
 import {
+  ActivityTypeEnum,
   IdentityTypeEnum,
   LayersEnum,
   MemorySourceType,
@@ -40,7 +41,10 @@ import {
   UserMemoryIdentity,
   UserMemoryItem,
   UserMemoryPreference,
+  UserMemoryActivitiesWithoutVectors,
+  UserMemoryActivity,
   userMemories,
+  userMemoriesActivities,
   userMemoriesContexts,
   userMemoriesExperiences,
   userMemoriesIdentities,
@@ -85,7 +89,7 @@ export interface BaseCreateUserMemoryParams {
   capturedAt?: Date;
   details: string;
   detailsEmbedding?: number[];
-  memoryCategory: string;
+  memoryCategory?: string | null;
   memoryLayer: LayersEnum;
   memoryType: TypesEnum;
   summary: string;
@@ -99,6 +103,16 @@ export interface CreateUserMemoryContextParams extends BaseCreateUserMemoryParam
     Omit<
       UserMemoryContext,
       'id' | 'userId' | 'createdAt' | 'updatedAt' | 'accessedAt' | 'userMemoryIds'
+    >,
+    'capturedAt'
+  >;
+}
+
+export interface CreateUserMemoryActivityParams extends BaseCreateUserMemoryParams {
+  activity: Optional<
+    Omit<
+      UserMemoryActivity,
+      'id' | 'userId' | 'createdAt' | 'updatedAt' | 'accessedAt' | 'userMemoryId'
     >,
     'capturedAt'
   >;
@@ -135,6 +149,7 @@ export interface CreateUserMemoryPreferenceParams extends BaseCreateUserMemoryPa
 }
 
 export type CreateUserMemoryParams =
+  | CreateUserMemoryActivityParams
   | CreateUserMemoryContextParams
   | CreateUserMemoryExperienceParams
   | CreateUserMemoryIdentityParams
@@ -143,7 +158,7 @@ export type CreateUserMemoryParams =
 export interface SearchUserMemoryParams {
   embedding?: number[];
   limit?: number;
-  limits?: Partial<Record<'contexts' | 'experiences' | 'preferences', number>>;
+  limits?: Partial<Record<'activities' | 'contexts' | 'experiences' | 'preferences', number>>;
   memoryCategory?: string;
   memoryType?: string;
   query?: string;
@@ -151,12 +166,13 @@ export interface SearchUserMemoryParams {
 
 export interface SearchUserMemoryWithEmbeddingParams {
   embedding?: number[];
-  limits?: Partial<Record<'contexts' | 'experiences' | 'preferences', number>>;
+  limits?: Partial<Record<'activities' | 'contexts' | 'experiences' | 'preferences', number>>;
   memoryCategory?: string;
   memoryType?: string;
 }
 
 export interface UserMemorySearchAggregatedResult {
+  activities: UserMemoryActivitiesWithoutVectors[];
   contexts: UserMemoryContextWithoutVectors[];
   experiences: UserMemoryExperienceWithoutVectors[];
   preferences: UserMemoryPreferenceWithoutVectors[];
@@ -311,6 +327,7 @@ export interface QueryIdentityRolesResult {
 }
 
 export type QueryUserMemoriesSort =
+  | 'capturedAt' // all layers
   | 'scoreConfidence' // user_memories_experiences
   | 'scoreImpact' // user_memories_contexts
   | 'scorePriority' // user_memories_preferences
@@ -379,10 +396,65 @@ export class UserMemoryModel {
         const extra = JSON.parse(parsed.data.extra || '{}');
         parsed.data.extra = extra;
         associations.push(parsed.data);
+        return;
+      }
+
+      if (
+        item &&
+        typeof item === 'object' &&
+        'name' in item &&
+        typeof (item as any).name === 'string'
+      ) {
+        associations.push({ name: (item as any).name });
       }
     });
 
     return associations.length > 0 ? associations : [];
+  }
+
+  static parseAssociatedLocations(
+    value?:
+      | {
+          address?: unknown;
+          name?: unknown;
+          tags?: unknown;
+          type?: unknown;
+        }[]
+      | Record<string, unknown>,
+  ) {
+    if (!value) return [];
+
+    const raw = Array.isArray(value) ? value : [value];
+    const locations: {
+      address?: string;
+      name?: string;
+      tags?: string[];
+      type?: string;
+    }[] = [];
+
+    raw.forEach((item) => {
+      if (!item || typeof item !== 'object') return;
+
+      const address = typeof (item as any).address === 'string' ? (item as any).address : undefined;
+      const name = typeof (item as any).name === 'string' ? (item as any).name : undefined;
+      const type = typeof (item as any).type === 'string' ? (item as any).type : undefined;
+      const tagsRaw = (item as any).tags;
+      const tags =
+        Array.isArray(tagsRaw) && tagsRaw.every((tag) => typeof tag === 'string')
+          ? (tagsRaw as string[])
+          : undefined;
+
+      if (address || name || type || tags) {
+        locations.push({
+          address,
+          name,
+          tags,
+          type,
+        });
+      }
+    });
+
+    return locations;
   }
 
   static parseDateFromString(value?: string | Date | null): Date | null {
@@ -536,6 +608,46 @@ export class UserMemoryModel {
     });
   };
 
+  createActivityMemory = async (
+    params: CreateUserMemoryActivityParams,
+  ): Promise<{ activity: UserMemoryActivity; memory: UserMemoryItem }> => {
+    return this.db.transaction(async (tx) => {
+      const baseValues = this.buildBaseMemoryInsertValues(params, {
+        metadata: params.activity.metadata ?? null,
+        status: params.activity.status ?? 'pending',
+        tags: params.activity.tags ?? null,
+      });
+
+      const [memory] = await tx.insert(userMemories).values(baseValues).returning();
+      if (!memory) throw new Error('Failed to create user memory activity');
+
+      const activityValues = {
+        associatedLocations: params.activity.associatedLocations ?? null,
+        associatedObjects: params.activity.associatedObjects ?? [],
+        associatedSubjects: params.activity.associatedSubjects ?? [],
+        capturedAt: params.activity.capturedAt,
+        endsAt: coerceDate(params.activity.endsAt),
+        feedback: params.activity.feedback ?? null,
+        feedbackVector: params.activity.feedbackVector ?? null,
+        metadata: params.activity.metadata ?? null,
+        narrative: params.activity.narrative ?? null,
+        narrativeVector: params.activity.narrativeVector ?? null,
+        notes: params.activity.notes ?? null,
+        startsAt: coerceDate(params.activity.startsAt),
+        status: params.activity.status ?? null,
+        tags: params.activity.tags ?? [],
+        timezone: params.activity.timezone ?? null,
+        type: params.activity.type ?? ActivityTypeEnum.Other,
+        userId: this.userId,
+        userMemoryId: memory.id,
+      } satisfies typeof userMemoriesActivities.$inferInsert;
+
+      const [activity] = await tx.insert(userMemoriesActivities).values(activityValues).returning();
+
+      return { activity, memory };
+    });
+  };
+
   createPreferenceMemory = async (
     params: CreateUserMemoryPreferenceParams,
   ): Promise<{ memory: UserMemoryItem; preference: UserMemoryPreference }> => {
@@ -574,12 +686,13 @@ export class UserMemoryModel {
     const { embedding, limits } = params;
 
     const resolvedLimits = {
+      activities: limits?.activities,
       contexts: limits?.contexts,
       experiences: limits?.experiences,
       preferences: limits?.preferences,
     };
 
-    const [experiences, contexts, preferences] = await Promise.all([
+    const [experiences, contexts, preferences, activities] = await Promise.all([
       this.searchExperiences({
         embedding,
         limit: resolvedLimits.experiences,
@@ -592,6 +705,10 @@ export class UserMemoryModel {
         embedding,
         limit: resolvedLimits.preferences,
       }),
+      this.searchActivities({
+        embedding,
+        limit: resolvedLimits.activities,
+      }),
     ]);
 
     const accessedMemoryIds = new Set<string>();
@@ -600,6 +717,9 @@ export class UserMemoryModel {
     });
     preferences.forEach((preference) => {
       if (preference.userMemoryId) accessedMemoryIds.add(preference.userMemoryId);
+    });
+    activities.forEach((activity) => {
+      if (activity.userMemoryId) accessedMemoryIds.add(activity.userMemoryId);
     });
     const contextLinkIds: string[] = [];
     contexts.forEach((context) => {
@@ -616,6 +736,7 @@ export class UserMemoryModel {
     }
 
     return {
+      activities,
       contexts,
       experiences,
       preferences,
@@ -668,7 +789,10 @@ export class UserMemoryModel {
     const { page = 1, size = 10 } = params;
     const offset = (page - 1) * size;
 
-    const identityConditions = [eq(userMemoriesIdentities.userId, this.userId)];
+    const identityConditions = [
+      eq(userMemoriesIdentities.userId, this.userId),
+      eq(userMemoriesIdentities.relationship, RelationshipEnum.Self),
+    ];
 
     const identityTags = this.db.$with('identity_tags').as(
       this.db
@@ -792,7 +916,9 @@ export class UserMemoryModel {
         const scoreColumn =
           sort === 'scoreUrgency'
             ? userMemoriesContexts.scoreUrgency
-            : userMemoriesContexts.scoreImpact;
+            : sort === 'scoreImpact'
+              ? userMemoriesContexts.scoreImpact
+              : userMemoriesContexts.capturedAt;
 
         const orderByClauses = buildOrderBy(
           scoreColumn,
@@ -880,8 +1006,13 @@ export class UserMemoryModel {
         };
       }
       case LayersEnum.Experience: {
+        const scoreColumn =
+          sort === 'scoreConfidence'
+            ? userMemoriesExperiences.scoreConfidence
+            : userMemoriesExperiences.capturedAt;
+
         const orderByClauses = buildOrderBy(
-          userMemoriesExperiences.scoreConfidence,
+          scoreColumn,
           userMemoriesExperiences.updatedAt,
           userMemoriesExperiences.createdAt,
         );
@@ -956,7 +1087,7 @@ export class UserMemoryModel {
       case LayersEnum.Identity: {
         const orderByClauses = buildOrderBy(
           undefined,
-          userMemoriesIdentities.updatedAt,
+          userMemoriesIdentities.capturedAt,
           userMemoriesIdentities.createdAt,
         );
         const joinCondition = and(
@@ -986,6 +1117,7 @@ export class UserMemoryModel {
             .select({
               identity: {
                 accessedAt: userMemoriesIdentities.accessedAt,
+                capturedAt: userMemoriesIdentities.capturedAt,
                 createdAt: userMemoriesIdentities.createdAt,
                 description: userMemoriesIdentities.description,
                 episodicDate: userMemoriesIdentities.episodicDate,
@@ -994,6 +1126,7 @@ export class UserMemoryModel {
                 relationship: userMemoriesIdentities.relationship,
                 role: userMemoriesIdentities.role,
                 tags: userMemoriesIdentities.tags,
+                title: userMemories.title,
                 type: userMemoriesIdentities.type,
                 updatedAt: userMemoriesIdentities.updatedAt,
                 userId: userMemoriesIdentities.userId,
@@ -1028,8 +1161,13 @@ export class UserMemoryModel {
         };
       }
       case LayersEnum.Preference: {
+        const scoreColumn =
+          sort === 'scorePriority'
+            ? userMemoriesPreferences.scorePriority
+            : userMemoriesPreferences.capturedAt;
+
         const orderByClauses = buildOrderBy(
-          userMemoriesPreferences.scorePriority,
+          scoreColumn,
           userMemoriesPreferences.updatedAt,
           userMemoriesPreferences.createdAt,
         );
@@ -1226,6 +1364,7 @@ export class UserMemoryModel {
         const [identity] = await this.db
           .select({
             accessedAt: userMemoriesIdentities.accessedAt,
+            capturedAt: userMemoriesIdentities.capturedAt,
             createdAt: userMemoriesIdentities.createdAt,
             description: userMemoriesIdentities.description,
             episodicDate: userMemoriesIdentities.episodicDate,
@@ -1776,6 +1915,61 @@ export class UserMemoryModel {
     await this.db.delete(userMemories).where(eq(userMemories.userId, this.userId));
   };
 
+  searchActivities = async (params: {
+    embedding?: number[];
+    limit?: number;
+    type?: string;
+  }): Promise<UserMemoryActivitiesWithoutVectors[]> => {
+    const { embedding, limit = 5, type } = params;
+    if (limit <= 0) {
+      return [];
+    }
+
+    let query = this.db
+      .select({
+        accessedAt: userMemoriesActivities.accessedAt,
+        associatedLocations: userMemoriesActivities.associatedLocations,
+        associatedObjects: userMemoriesActivities.associatedObjects,
+        associatedSubjects: userMemoriesActivities.associatedSubjects,
+        capturedAt: userMemoriesActivities.capturedAt,
+        createdAt: userMemoriesActivities.createdAt,
+        endsAt: userMemoriesActivities.endsAt,
+        feedback: userMemoriesActivities.feedback,
+        id: userMemoriesActivities.id,
+        metadata: userMemoriesActivities.metadata,
+        narrative: userMemoriesActivities.narrative,
+        notes: userMemoriesActivities.notes,
+        startsAt: userMemoriesActivities.startsAt,
+        status: userMemoriesActivities.status,
+        tags: userMemoriesActivities.tags,
+        timezone: userMemoriesActivities.timezone,
+        type: userMemoriesActivities.type,
+        updatedAt: userMemoriesActivities.updatedAt,
+        userId: userMemoriesActivities.userId,
+        userMemoryId: userMemoriesActivities.userMemoryId,
+        ...(embedding && {
+          similarity: sql<number>`1 - (${cosineDistance(userMemoriesActivities.narrativeVector, embedding)}) AS similarity`,
+        }),
+      })
+      .from(userMemoriesActivities)
+      .$dynamic();
+
+    const conditions = [eq(userMemoriesActivities.userId, this.userId)];
+    if (type) {
+      conditions.push(eq(userMemoriesActivities.type, type));
+    }
+
+    query = query.where(and(...conditions));
+
+    if (embedding) {
+      query = query.orderBy(desc(sql`similarity`));
+    } else {
+      query = query.orderBy(desc(userMemoriesActivities.createdAt));
+    }
+
+    return query.limit(limit) as Promise<UserMemoryActivitiesWithoutVectors[]>;
+  };
+
   searchContexts = async (params: {
     embedding?: number[];
     limit?: number;
@@ -1933,7 +2127,7 @@ export class UserMemoryModel {
       .select(selectNonVectorColumns(userMemoriesIdentities))
       .from(userMemoriesIdentities)
       .where(eq(userMemoriesIdentities.userId, this.userId))
-      .orderBy(desc(userMemoriesIdentities.createdAt));
+      .orderBy(desc(userMemoriesIdentities.capturedAt));
 
     return res;
   };
@@ -1947,7 +2141,7 @@ export class UserMemoryModel {
       .from(userMemoriesIdentities)
       .innerJoin(userMemories, eq(userMemories.id, userMemoriesIdentities.userMemoryId))
       .where(eq(userMemoriesIdentities.userId, this.userId))
-      .orderBy(desc(userMemoriesIdentities.createdAt));
+      .orderBy(desc(userMemoriesIdentities.capturedAt));
 
     return res as Array<{
       identity: typeof userMemoriesIdentities.$inferSelect;
@@ -1962,7 +2156,7 @@ export class UserMemoryModel {
       .where(
         and(eq(userMemoriesIdentities.userId, this.userId), eq(userMemoriesIdentities.type, type)),
       )
-      .orderBy(desc(userMemoriesIdentities.createdAt));
+      .orderBy(desc(userMemoriesIdentities.capturedAt));
 
     return res;
   };
