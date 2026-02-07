@@ -230,6 +230,20 @@ show_message() {
                 ;;
             esac
         ;;
+        tips_disable_registration)
+            case $LANGUAGE in
+                zh_CN)
+                    echo "如需限制用户注册，可在 .env 中配置："
+                    echo "  - 使用 SSO 登录时，设置 AUTH_DISABLE_EMAIL_PASSWORD=1 可禁用邮箱密码注册"
+                    echo "  - 使用邮箱密码登录时，设置 AUTH_ALLOWED_EMAILS=user1@example.com,user2@example.com 可限制允许登录的邮箱"
+                ;;
+                *)
+                    echo "To restrict user registration, configure in .env:"
+                    echo "  - For SSO login: set AUTH_DISABLE_EMAIL_PASSWORD=1 to disable email/password registration"
+                    echo "  - For email/password login: set AUTH_ALLOWED_EMAILS=user1@example.com,user2@example.com to allow specific emails"
+                ;;
+            esac
+        ;;
         tips_show_documentation)
             case $LANGUAGE in
                 zh_CN)
@@ -595,7 +609,6 @@ section_configurate_host() {
     # lobe host
     sed "${SED_INPLACE_ARGS[@]}" "s#^APP_URL=.*#APP_URL=$PROTOCOL://$LOBE_HOST#" .env
     # s3 related
-    sed "${SED_INPLACE_ARGS[@]}" "s#^S3_PUBLIC_DOMAIN=.*#S3_PUBLIC_DOMAIN=$PROTOCOL://$RUSTFS_HOST#" .env
     sed "${SED_INPLACE_ARGS[@]}" "s#^S3_ENDPOINT=.*#S3_ENDPOINT=$PROTOCOL://$RUSTFS_HOST#" .env
     
 
@@ -655,10 +668,31 @@ section_regenerate_secrets() {
         echo $(show_message "security_secrect_regenerate_failed") "RUSTFS_SECRET_KEY"
         RUSTFS_SECRET_KEY="YOUR_RUSTFS_PASSWORD"
     else
-        # Search and replace the value of S3_SECRET_ACCESS_KEY in .env
         sed "${SED_INPLACE_ARGS[@]}" "s#^RUSTFS_SECRET_KEY=.*#RUSTFS_SECRET_KEY=${RUSTFS_SECRET_KEY}#" .env
         if [ $? -ne 0 ]; then
             echo $(show_message "security_secrect_regenerate_failed") "RUSTFS_SECRET_KEY in \`.env\`"
+        fi
+    fi
+
+    # Generate KEY_VAULTS_SECRET (base64 encoded 32 bytes)
+    KEY_VAULTS_SECRET=$(openssl rand -base64 32)
+    if [ $? -ne 0 ]; then
+        echo $(show_message "security_secrect_regenerate_failed") "KEY_VAULTS_SECRET"
+    else
+        sed "${SED_INPLACE_ARGS[@]}" "s#^KEY_VAULTS_SECRET=.*#KEY_VAULTS_SECRET=${KEY_VAULTS_SECRET}#" .env
+        if [ $? -ne 0 ]; then
+            echo $(show_message "security_secrect_regenerate_failed") "KEY_VAULTS_SECRET in \`.env\`"
+        fi
+    fi
+
+    # Generate AUTH_SECRET (base64 encoded 32 bytes)
+    AUTH_SECRET=$(openssl rand -base64 32)
+    if [ $? -ne 0 ]; then
+        echo $(show_message "security_secrect_regenerate_failed") "AUTH_SECRET"
+    else
+        sed "${SED_INPLACE_ARGS[@]}" "s#^AUTH_SECRET=.*#AUTH_SECRET=${AUTH_SECRET}#" .env
+        if [ $? -ne 0 ]; then
+            echo $(show_message "security_secrect_regenerate_failed") "AUTH_SECRET in \`.env\`"
         fi
     fi
 }
@@ -726,7 +760,8 @@ section_display_configurated_report() {
     printf "\n%s\n\n" "$(show_message "tips_run_command")"
     print_centered "docker compose up --no-attach searxng" "green"
     printf "\n%s\n" "$(show_message "tips_if_run_normally")"
-    printf "\n%s\n\n" "$(show_message "tips_regen_jwks")"
+    printf "\n%s\n" "$(show_message "tips_regen_jwks")"
+    printf "\n%s\n\n" "$(show_message "tips_disable_registration")"
     print_centered "docker compose up -d --no-attach searxng" "green"
     printf "\n%s\n" "$(show_message "tips_if_want_searxng_logs")"
     print_centered "docker compose logs -f searxng" "white"
