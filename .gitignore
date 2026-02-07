@@ -127,4 +127,5 @@ out
 i18n-unused-keys-report.json
 .vitest-reports
 
-pnpm-lock.yaml
+pnpm-lock.yamlscripts/clerk-to-betterauth/prod/
+scripts/clerk-to-betterauth/test/
