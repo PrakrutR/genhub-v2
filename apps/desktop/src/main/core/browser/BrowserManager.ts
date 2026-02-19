@@ -1,13 +1,16 @@
-import { MainBroadcastEventKey, MainBroadcastParams } from '@lobechat/electron-client-ipc';
-import { WebContents } from 'electron';
+import {
+  type MainBroadcastEventKey,
+  type MainBroadcastParams,
+} from '@lobechat/electron-client-ipc';
+import { type WebContents } from 'electron';
 
 import { createLogger } from '@/utils/logger';
 
 import {
-  AppBrowsersIdentifiers,
-  BrowsersIdentifiers,
-  WindowTemplateIdentifiers,
   appBrowsers,
+  type AppBrowsersIdentifiers,
+  BrowsersIdentifiers,
+  type WindowTemplateIdentifiers,
   windowTemplates,
 } from '../../appBrowsers';
 import type { App } from '../App';
@@ -141,7 +144,7 @@ export class BrowserManager {
     const browserOpts: BrowserWindowOpts = {
       ...template,
       identifier: windowId,
-      path: path,
+      path,
     };
 
     logger.debug(`Creating multi-instance window: ${windowId} with path: ${path}`);
@@ -149,7 +152,7 @@ export class BrowserManager {
     const browser = this.retrieveOrInitialize(browserOpts);
 
     return {
-      browser: browser,
+      browser,
       identifier: windowId,
     };
   }
@@ -211,10 +214,10 @@ export class BrowserManager {
     const identifier = options.identifier;
     this.browsers.set(identifier, browser);
 
-    // 记录 WebContents 和 identifier 的映射
+    // Record the mapping between WebContents and identifier
     this.webContentsMap.set(browser.browserWindow.webContents, identifier);
 
-    // 当窗口关闭时清理映射
+    // Clean up the mapping when the window is closed
     browser.browserWindow.on('close', () => {
       if (browser.webContents) this.webContentsMap.delete(browser.webContents);
     });
