@@ -494,6 +494,7 @@
       "electron",
       "es5-ext",
       "esbuild",
+      "ffmpeg-static",
       "onnxruntime-node",
       "protobufjs",
       "sharp",
