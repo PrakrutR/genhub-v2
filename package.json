@@ -481,7 +481,25 @@
   },
   "pnpm": {
     "onlyBuiltDependencies": [
-      "ffmpeg-static"
+      "@clerk/shared",
+      "@lobehub/editor",
+      "@playwright/browser-chromium",
+      "@scarf/scarf",
+      "@swc/core",
+      "@tree-sitter-grammars/tree-sitter-yaml",
+      "@vercel/speed-insights",
+      "better-sqlite3",
+      "core-js",
+      "core-js-pure",
+      "electron",
+      "es5-ext",
+      "esbuild",
+      "onnxruntime-node",
+      "protobufjs",
+      "sharp",
+      "tree-sitter",
+      "tree-sitter-json",
+      "unrs-resolver"
     ],
     "overrides": {
       "@types/react": "19.2.13",
