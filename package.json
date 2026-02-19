@@ -154,7 +154,6 @@
     ]
   },
   "overrides": {
-    "@lobehub/editor": "^3.16.1",
     "pdfjs-dist": "5.4.530",
     "stylelint-config-clean-order": "7.0.0"
   },
