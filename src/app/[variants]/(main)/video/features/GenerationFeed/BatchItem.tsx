@@ -134,7 +134,13 @@ export const VideoGenerationBatchItem = memo<VideoGenerationBatchItemProps>(({ b
       );
     }
 
-    return <VideoLoadingItem aspectRatio={batch.config?.aspectRatio} generation={generation} />;
+    return (
+      <VideoLoadingItem
+        aspectRatio={batch.config?.aspectRatio}
+        avgLatencyMs={batch.avgLatencyMs}
+        generation={generation}
+      />
+    );
   };
 
   const hasReferenceFrames = batch.config?.imageUrl || batch.config?.endImageUrl;
@@ -142,7 +148,7 @@ export const VideoGenerationBatchItem = memo<VideoGenerationBatchItemProps>(({ b
   const promptAndMetadata = (
     <>
       <Markdown variant={'chat'}>{batch.prompt}</Markdown>
-      <Flexbox gap={4} horizontal style={{ marginBottom: 10 }}>
+      <Flexbox horizontal gap={4} style={{ marginBottom: 10 }}>
         <ModelTag model={batch.model} />
         {batch.config?.resolution && <Tag>{batch.config.resolution}</Tag>}
         {displayAspectRatio && <Tag>{displayAspectRatio}</Tag>}
@@ -153,7 +159,7 @@ export const VideoGenerationBatchItem = memo<VideoGenerationBatchItemProps>(({ b
   return (
     <Block gap={8} variant={'borderless'}>
       {hasReferenceFrames ? (
-        <Flexbox align={'center'} gap={16} horizontal>
+        <Flexbox horizontal align={'center'} gap={16}>
           <VideoReferenceFrames
             endImageUrl={batch.config?.endImageUrl}
             imageUrl={batch.config?.imageUrl}
