@@ -4,6 +4,7 @@ import { LOADING_FLAT } from '@lobechat/const';
 import { type LobeToolManifest } from '@lobechat/context-engine';
 import { type LobeChatDatabase } from '@lobechat/database';
 import {
+  type ChatTopicBotContext,
   type ExecAgentParams,
   type ExecAgentResult,
   type ExecGroupAgentParams,
@@ -30,6 +31,7 @@ import {
 import { AgentService } from '@/server/services/agent';
 import { AgentRuntimeService } from '@/server/services/agentRuntime';
 import { type StepLifecycleCallbacks } from '@/server/services/agentRuntime/types';
+import { FileService } from '@/server/services/file';
 import { KlavisService } from '@/server/services/klavis';
 import { MarketService } from '@/server/services/market';
 
@@ -64,6 +66,8 @@ function formatErrorForMetadata(error: unknown): Record<string, any> | undefined
  * This extends the public ExecAgentParams with server-side only options
  */
 interface InternalExecAgentParams extends ExecAgentParams {
+  /** Bot context for topic metadata (platform, applicationId, platformThreadId) */
+  botContext?: ChatTopicBotContext;
   /**
    * Completion webhook configuration
    * Persisted in Redis state, triggered via HTTP POST when the operation completes.
@@ -74,12 +78,34 @@ interface InternalExecAgentParams extends ExecAgentParams {
   };
   /** Cron job ID that triggered this execution (if trigger is 'cron') */
   cronJobId?: string;
+  /** Discord context for injecting channel/guild info into agent system message */
+  discordContext?: any;
   /** Eval context for injecting environment prompts into system message */
   evalContext?: EvalContext;
+  /** External file URLs to download, upload to S3, and attach to the user message */
+  files?: Array<{
+    mimeType?: string;
+    name?: string;
+    size?: number;
+    url: string;
+  }>;
   /** Maximum steps for the agent operation */
   maxSteps?: number;
   /** Step lifecycle callbacks for operation tracking (server-side only) */
   stepCallbacks?: StepLifecycleCallbacks;
+  /**
+   * Step webhook configuration
+   * Persisted in Redis state, triggered via HTTP POST after each step completes.
+   */
+  stepWebhook?: {
+    body?: Record<string, unknown>;
+    url: string;
+  };
+  /**
+   * Whether the LLM call should use streaming.
+   * Defaults to true. Set to false for non-streaming scenarios (e.g., bot integrations).
+   */
+  stream?: boolean;
   /** Topic creation trigger source ('cron' | 'chat' | 'api') */
   trigger?: string;
   /**
@@ -87,6 +113,12 @@ interface InternalExecAgentParams extends ExecAgentParams {
    * Use { approvalMode: 'headless' } for async tasks that should never wait for human approval
    */
   userInterventionConfig?: UserInterventionConfig;
+  /**
+   * Webhook delivery method.
+   * - 'fetch': plain HTTP POST (default)
+   * - 'qstash': deliver via QStash publishJSON for guaranteed delivery
+   */
+  webhookDelivery?: 'fetch' | 'qstash';
 }
 
 /**
@@ -144,14 +176,20 @@ export class AiAgentService {
       prompt,
       appContext,
       autoStart = true,
+      botContext,
+      discordContext,
       existingMessageIds = [],
+      files,
       stepCallbacks,
+      stream,
       trigger,
       cronJobId,
       evalContext,
       maxSteps,
       userInterventionConfig,
       completionWebhook,
+      stepWebhook,
+      webhookDelivery,
     } = params;
 
     // Validate that either agentId or slug is provided
@@ -184,8 +222,11 @@ export class AiAgentService {
     // 2. Handle topic creation: if no topicId provided, create a new topic; otherwise reuse existing
     let topicId = appContext?.topicId;
     if (!topicId) {
-      // Prepare metadata with cronJobId if provided
-      const metadata = cronJobId ? { cronJobId } : undefined;
+      // Prepare metadata with cronJobId and botContext if provided
+      const metadata =
+        cronJobId || botContext
+          ? { bot: botContext, cronJobId: cronJobId || undefined }
+          : undefined;
 
       const newTopic = await this.topicModel.create({
         agentId: resolvedAgentId,
@@ -398,24 +439,62 @@ export class AiAgentService {
         sessionId: appContext?.sessionId,
         topicId: appContext?.topicId ?? undefined,
       });
-      if (existingMessageIds.length > 0) {
-        const idSet = new Set(existingMessageIds);
-        historyMessages = historyMessages.filter((msg) => idSet.has(msg.id));
-      }
+      const idSet = new Set(existingMessageIds);
+      historyMessages = historyMessages.filter((msg) => idSet.has(msg.id));
+    } else if (appContext?.topicId) {
+      // Follow-up message in existing topic: load all history for context
+      historyMessages = await this.messageModel.query({
+        sessionId: appContext?.sessionId,
+        topicId: appContext.topicId,
+      });
     }
 
-    // 9. Create user message in database
+    // 9. Upload external files to S3 and collect file IDs
+    let fileIds: string[] | undefined;
+    let imageList: Array<{ alt: string; id: string; url: string }> | undefined;
+
+    if (files && files.length > 0) {
+      const fileService = new FileService(this.db, this.userId);
+      fileIds = [];
+      imageList = [];
+
+      for (const file of files) {
+        const ext = file.name?.split('.').pop() || 'bin';
+        const pathname = `files/${this.userId}/${nanoid()}/${file.name || `file.${ext}`}`;
+
+        try {
+          const result = await fileService.uploadFromUrl(file.url, pathname);
+          fileIds.push(result.fileId);
+
+          // Build imageList for vision-capable models
+          const mimeType = file.mimeType || '';
+          if (mimeType.startsWith('image/')) {
+            imageList.push({ alt: file.name || 'image', id: result.fileId, url: result.url });
+          }
+        } catch (error) {
+          log('execAgent: failed to upload file %s: %O', file.url, error);
+        }
+      }
+
+      if (fileIds.length > 0) {
+        log('execAgent: uploaded %d files to S3', fileIds.length);
+      }
+      if (imageList.length === 0) imageList = undefined;
+    }
+
+    // 10. Create user message in database
     // Include threadId if provided (for SubAgent task execution in isolated Thread)
     const userMessageRecord = await this.messageModel.create({
       agentId: resolvedAgentId,
       content: prompt,
+      files: fileIds,
       role: 'user',
       threadId: appContext?.threadId ?? undefined,
       topicId,
     });
     log('execAgent: created user message %s', userMessageRecord.id);
 
-    // 10. Create assistant message placeholder in database
+    // 11. Create assistant message placeholder in database
     // Include threadId if provided (for SubAgent task execution in isolated Thread)
     const assistantMessageRecord = await this.messageModel.create({
       agentId: resolvedAgentId,
@@ -429,8 +508,8 @@ export class AiAgentService {
     });
     log('execAgent: created assistant message %s', assistantMessageRecord.id);
 
-    // Create user message object for processing
-    const userMessage = { content: prompt, role: 'user' as const };
+    // Create user message object for processing (include imageList for vision models)
+    const userMessage = { content: prompt, imageList, role: 'user' as const };
 
     // Combine history messages with user message
     const allMessages = [...historyMessages, userMessage];
@@ -487,18 +566,22 @@ export class AiAgentService {
         },
         autoStart,
         completionWebhook,
+        discordContext,
         evalContext,
         initialContext,
         initialMessages: allMessages,
         maxSteps,
+        stepWebhook,
         modelRuntimeConfig: { model, provider },
         operationId,
         stepCallbacks,
+        stream,
         toolManifestMap,
         toolSourceMap,
         tools,
         userId: this.userId,
         userInterventionConfig,
+        webhookDelivery,
       });
 
       log('execAgent: created operation %s (autoStarted: %s)', operationId, result.autoStarted);
