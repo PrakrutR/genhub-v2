@@ -32,6 +32,7 @@ import {
   eq,
   gt,
   gte,
+  ilike,
   inArray,
   isNotNull,
   isNull,
@@ -64,7 +65,8 @@ import {
   topics,
 } from '../schemas';
 import type { LobeChatDatabase, Transaction } from '../type';
-import { sanitizeBm25Query } from '../utils/bm25';
+import { sanitizeBm25Query, sanitizeIlikeQuery } from '../utils/bm25';
+import { isPgSearchAvailable } from '../utils/pgSearch';
 import { genEndDateWhere, genRangeWhere, genStartDateWhere, genWhere } from '../utils/genWhere';
 import { idGenerator } from '../utils/idGenerator';
 
@@ -1084,12 +1086,29 @@ export class MessageModel {
   queryByKeyword = async (keyword: string) => {
     if (!keyword.trim()) return [];
 
-    const bm25Query = sanitizeBm25Query(keyword);
-    const result = await this.db
-      .select()
-      .from(messages)
-      .where(and(eq(messages.userId, this.userId), sql`${messages.content} @@@ ${bm25Query}`))
-      .orderBy(desc(messages.createdAt));
+    const useBm25 = await isPgSearchAvailable(this.db);
+
+    const result = await (useBm25
+      ? this.db
+          .select()
+          .from(messages)
+          .where(
+            and(
+              eq(messages.userId, this.userId),
+              sql`${messages.content} @@@ ${sanitizeBm25Query(keyword)}`,
+            ),
+          )
+          .orderBy(desc(messages.createdAt))
+      : this.db
+          .select()
+          .from(messages)
+          .where(
+            and(
+              eq(messages.userId, this.userId),
+              ilike(messages.content, `%${sanitizeIlikeQuery(keyword)}%`),
+            ),
+          )
+          .orderBy(desc(messages.createdAt)));
 
     return result as DBMessageItem[];
   };

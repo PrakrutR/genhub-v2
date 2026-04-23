@@ -43,3 +43,11 @@ export function sanitizeBm25Query(query: string, options: SanitizeBm25QueryOptio
 
   return terms.join(' AND ');
 }
+
+/**
+ * Escape special ILIKE pattern characters so user input cannot inject wildcards.
+ * Escapes backslash, percent, and underscore.
+ */
+export function sanitizeIlikeQuery(query: string): string {
+  return query.replaceAll(/[\\%_]/g, '\\$&');
+}

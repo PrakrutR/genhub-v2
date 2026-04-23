@@ -6,7 +6,7 @@ import type {
   LobeGroupSession,
   SessionRankItem,
 } from '@lobechat/types';
-import { and, asc, count, desc, eq, gt, inArray, isNull, not, or, sql } from 'drizzle-orm';
+import { and, asc, count, desc, eq, gt, ilike, inArray, isNull, not, or, sql } from 'drizzle-orm';
 import type { PartialDeep } from 'type-fest';
 
 import { merge } from '@/utils/merge';
@@ -14,7 +14,8 @@ import { merge } from '@/utils/merge';
 import type { AgentItem, NewAgent, NewSession, SessionItem } from '../schemas';
 import { agents, agentsToSessions, sessionGroups, sessions, topics } from '../schemas';
 import type { LobeChatDatabase } from '../type';
-import { sanitizeBm25Query } from '../utils/bm25';
+import { sanitizeBm25Query, sanitizeIlikeQuery } from '../utils/bm25';
+import { isPgSearchAvailable } from '../utils/pgSearch';
 import { genEndDateWhere, genRangeWhere, genStartDateWhere, genWhere } from '../utils/genWhere';
 import { idGenerator } from '../utils/idGenerator';
 
@@ -638,17 +639,25 @@ export class SessionModel {
     const offset = current * pageSize;
 
     try {
-      const bm25Query = sanitizeBm25Query(keyword);
+      const useBm25 = await isPgSearchAvailable(this.db);
+      const bm25Query = useBm25 ? sanitizeBm25Query(keyword) : '';
+      const ilikePattern = useBm25 ? '' : `%${sanitizeIlikeQuery(keyword)}%`;
+
+      const whereCondition = useBm25
+        ? and(
+            eq(agents.userId, this.userId),
+            sql`(${agents.title} @@@ ${bm25Query} OR ${agents.description} @@@ ${bm25Query})`,
+          )
+        : and(
+            eq(agents.userId, this.userId),
+            or(ilike(agents.title, ilikePattern), ilike(agents.description, ilikePattern)),
+          );
 
       const results = await this.db.query.agents.findMany({
         limit: pageSize,
         offset,
-        // Keep deterministic ordering for keyword search results
         orderBy: [asc(agents.id)],
-        where: and(
-          eq(agents.userId, this.userId),
-          sql`(${agents.title} @@@ ${bm25Query} OR ${agents.description} @@@ ${bm25Query})`,
-        ),
+        where: whereCondition,
         with: { agentsToSessions: { columns: {}, with: { session: true } } },
       });
 

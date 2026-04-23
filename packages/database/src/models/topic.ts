@@ -1,11 +1,12 @@
 import type { ChatTopicMetadata, DBMessageItem, TopicRankItem } from '@lobechat/types';
 import type { SQL } from 'drizzle-orm';
-import { and, count, desc, eq, gt, gte, inArray, isNull, lte, ne, not, or, sql } from 'drizzle-orm';
+import { and, count, desc, eq, gt, gte, ilike, inArray, isNull, lte, ne, not, or, sql } from 'drizzle-orm';
 
 import type { TopicItem } from '../schemas';
 import { agents, agentsToSessions, messagePlugins, messages, topics } from '../schemas';
 import type { LobeChatDatabase } from '../type';
-import { sanitizeBm25Query } from '../utils/bm25';
+import { sanitizeBm25Query, sanitizeIlikeQuery } from '../utils/bm25';
+import { isPgSearchAvailable } from '../utils/pgSearch';
 import { genEndDateWhere, genRangeWhere, genStartDateWhere, genWhere } from '../utils/genWhere';
 import { idGenerator } from '../utils/idGenerator';
 
@@ -279,37 +280,72 @@ export class TopicModel {
   queryByKeyword = async (keyword: string, containerId?: string | null): Promise<TopicItem[]> => {
     if (!keyword.trim()) return [];
 
-    const bm25Query = sanitizeBm25Query(keyword);
+    const useBm25 = await isPgSearchAvailable(this.db);
 
-    // Run title and message content searches in parallel
-    const [topicsByTitle, topicIdsByMessages] = await Promise.all([
-      // Query topics matching by title (BM25)
-      this.db
-        .select()
-        .from(topics)
-        .where(
-          and(
-            eq(topics.userId, this.userId),
-            this.matchContainer(containerId),
-            sql`${topics.title} @@@ ${bm25Query}`,
-          ),
-        )
-        .orderBy(desc(topics.updatedAt)),
-      // Query topic IDs matching by message content (BM25)
-      this.db
-        .select({ topicId: messages.topicId })
-        .from(messages)
-        .innerJoin(topics, eq(messages.topicId, topics.id))
-        .where(
-          and(
-            eq(messages.userId, this.userId),
-            sql`${messages.content} @@@ ${bm25Query}`,
-            eq(topics.userId, this.userId),
-            this.matchContainer(containerId),
-          ),
-        )
-        .groupBy(messages.topicId),
-    ]);
+    let topicsByTitle: TopicItem[];
+    let topicIdsByMessages: { topicId: string | null }[];
+
+    if (useBm25) {
+      const bm25Query = sanitizeBm25Query(keyword);
+
+      // Run title and message content searches in parallel (BM25)
+      [topicsByTitle, topicIdsByMessages] = await Promise.all([
+        this.db
+          .select()
+          .from(topics)
+          .where(
+            and(
+              eq(topics.userId, this.userId),
+              this.matchContainer(containerId),
+              sql`${topics.title} @@@ ${bm25Query}`,
+            ),
+          )
+          .orderBy(desc(topics.updatedAt)),
+        this.db
+          .select({ topicId: messages.topicId })
+          .from(messages)
+          .innerJoin(topics, eq(messages.topicId, topics.id))
+          .where(
+            and(
+              eq(messages.userId, this.userId),
+              sql`${messages.content} @@@ ${bm25Query}`,
+              eq(topics.userId, this.userId),
+              this.matchContainer(containerId),
+            ),
+          )
+          .groupBy(messages.topicId),
+      ]);
+    } else {
+      const ilikeQuery = `%${sanitizeIlikeQuery(keyword)}%`;
+
+      // Run title and message content searches in parallel (ilike fallback)
+      [topicsByTitle, topicIdsByMessages] = await Promise.all([
+        this.db
+          .select()
+          .from(topics)
+          .where(
+            and(
+              eq(topics.userId, this.userId),
+              this.matchContainer(containerId),
+              ilike(topics.title, ilikeQuery),
+            ),
+          )
+          .orderBy(desc(topics.updatedAt)),
+        this.db
+          .select({ topicId: messages.topicId })
+          .from(messages)
+          .innerJoin(topics, eq(messages.topicId, topics.id))
+          .where(
+            and(
+              eq(messages.userId, this.userId),
+              ilike(messages.content, ilikeQuery),
+              eq(topics.userId, this.userId),
+              this.matchContainer(containerId),
+            ),
+          )
+          .groupBy(messages.topicId),
+      ]);
+    }
     // If no topics found by message content, return topics matching by title
     if (topicIdsByMessages.length === 0) {
       return topicsByTitle;

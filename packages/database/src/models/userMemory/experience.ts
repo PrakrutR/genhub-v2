@@ -1,11 +1,12 @@
 import type { ExperienceListParams, ExperienceListResult } from '@lobechat/types';
 import type { SQL } from 'drizzle-orm';
-import { and, asc, desc, eq, inArray, or, sql } from 'drizzle-orm';
+import { and, asc, desc, eq, ilike, inArray, or, sql } from 'drizzle-orm';
 
 import type { NewUserMemoryExperience, UserMemoryExperience } from '../../schemas';
 import { userMemories, userMemoriesExperiences } from '../../schemas';
 import type { LobeChatDatabase } from '../../type';
-import { SAFE_BM25_QUERY_OPTIONS, sanitizeBm25Query } from '../../utils/bm25';
+import { SAFE_BM25_QUERY_OPTIONS, sanitizeBm25Query, sanitizeIlikeQuery } from '../../utils/bm25';
+import { isPgSearchAvailable } from '../../utils/pgSearch';
 
 export class UserMemoryExperienceModel {
   private userId: string;
@@ -74,16 +75,25 @@ export class UserMemoryExperienceModel {
     const normalizedPageSize = Math.min(Math.max(pageSize, 1), 100);
     const offset = (normalizedPage - 1) * normalizedPageSize;
     const normalizedQuery = typeof q === 'string' ? q.trim() : '';
-    const bm25Query = normalizedQuery
-      ? sanitizeBm25Query(normalizedQuery, SAFE_BM25_QUERY_OPTIONS)
-      : '';
+    const useBm25 = normalizedQuery ? await isPgSearchAvailable(this.db) : true;
+    const bm25Query =
+      normalizedQuery && useBm25 ? sanitizeBm25Query(normalizedQuery, SAFE_BM25_QUERY_OPTIONS) : '';
+    const ilikePattern =
+      normalizedQuery && !useBm25 ? `%${sanitizeIlikeQuery(normalizedQuery)}%` : '';
 
     // Build WHERE conditions
     const conditions: Array<SQL | undefined> = [
       eq(userMemoriesExperiences.userId, this.userId),
       // Full-text search across title, situation, keyLearning, action
       normalizedQuery
-        ? sql`(${userMemories.title} @@@ ${bm25Query} OR ${userMemoriesExperiences.situation} @@@ ${bm25Query} OR ${userMemoriesExperiences.keyLearning} @@@ ${bm25Query} OR ${userMemoriesExperiences.action} @@@ ${bm25Query})`
+        ? useBm25
+          ? sql`(${userMemories.title} @@@ ${bm25Query} OR ${userMemoriesExperiences.situation} @@@ ${bm25Query} OR ${userMemoriesExperiences.keyLearning} @@@ ${bm25Query} OR ${userMemoriesExperiences.action} @@@ ${bm25Query})`
+          : or(
+              ilike(userMemories.title, ilikePattern),
+              ilike(userMemoriesExperiences.situation, ilikePattern),
+              ilike(userMemoriesExperiences.keyLearning, ilikePattern),
+              ilike(userMemoriesExperiences.action, ilikePattern),
+            )
         : undefined,
       types && types.length > 0 ? inArray(userMemoriesExperiences.type, types) : undefined,
       tags && tags.length > 0
