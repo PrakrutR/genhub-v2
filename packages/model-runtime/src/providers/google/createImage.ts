@@ -142,7 +142,9 @@ async function generateImageByChatModel(
   ];
 
   const config: GenerateContentConfig = {
-    responseModalities: ['Image'],
+    // Include 'Text' alongside 'Image' so thinking models can emit thinking tokens
+    // without causing the API to return a malformed/truncated response.
+    responseModalities: ['Text', 'Image'],
     ...(params.aspectRatio && params.aspectRatio !== 'auto'
       ? {
           imageConfig: {
