@@ -40,6 +40,7 @@ export default eslint(
       // AI coding tools directories
       '.claude',
       '.serena',
+      '.i18nrc.js',
     ],
     next: true,
     react: 'next',
@@ -129,6 +130,20 @@ export default eslint(
   // E2E and test files - allow console.log for debugging
   {
     files: ['e2e/**/*', '**/*.test.ts', '**/*.test.tsx'],
+    rules: {
+      'no-console': 0,
+    },
+  },
+  // agent-tracing CLI - console output is the primary interface
+  {
+    files: ['packages/agent-tracing/**/*'],
+    rules: {
+      'no-console': 0,
+    },
+  },
+  // lobehub-cli - console output is the primary interface
+  {
+    files: ['apps/cli/**/*'],
     rules: {
       'no-console': 0,
     },

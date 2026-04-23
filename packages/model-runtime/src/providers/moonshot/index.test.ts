@@ -11,8 +11,8 @@ import {
   params,
 } from './index';
 
-const defaultOpenAIBaseURL = 'https://api.moonshot.ai/v1';
-const anthropicBaseURL = 'https://api.moonshot.ai/anthropic';
+const defaultOpenAIBaseURL = 'https://api.moonshot.cn/v1';
+const anthropicBaseURL = 'https://api.moonshot.cn/anthropic';
 
 // Mock the console.error and console.warn to avoid polluting test output
 vi.spyOn(console, 'error').mockImplementation(() => {});
@@ -28,7 +28,7 @@ describe('LobeMoonshotAI', () => {
     it('should route to OpenAI format when baseURL ends with /v1', async () => {
       const runtime = new LobeMoonshotAI({
         apiKey: 'test',
-        baseURL: 'https://api.moonshot.ai/v1',
+        baseURL: 'https://api.moonshot.cn/v1',
       });
       expect(runtime).toBeInstanceOf(LobeMoonshotAI);
     });
@@ -36,7 +36,7 @@ describe('LobeMoonshotAI', () => {
     it('should route to Anthropic format when baseURL ends with /anthropic', async () => {
       const runtime = new LobeMoonshotAI({
         apiKey: 'test',
-        baseURL: 'https://api.moonshot.ai/anthropic',
+        baseURL: 'https://api.moonshot.cn/anthropic',
       });
       expect(runtime).toBeInstanceOf(LobeMoonshotAI);
     });
@@ -44,7 +44,7 @@ describe('LobeMoonshotAI', () => {
     it('should route to Anthropic format when baseURL ends with /anthropic/', async () => {
       const runtime = new LobeMoonshotAI({
         apiKey: 'test',
-        baseURL: 'https://api.moonshot.ai/anthropic/',
+        baseURL: 'https://api.moonshot.cn/anthropic/',
       });
       expect(runtime).toBeInstanceOf(LobeMoonshotAI);
     });
@@ -249,6 +249,65 @@ describe('LobeMoonshotOpenAI', () => {
       });
     });
 
+    describe('kimi-k2-thinking native thinking models', () => {
+      it('should always enable thinking for kimi-k2-thinking', async () => {
+        await instance.chat({
+          messages: [{ content: 'Hello', role: 'user' }],
+          model: 'kimi-k2-thinking',
+          temperature: 0.5,
+        });
+
+        const payload = getLastRequestPayload();
+        expect(payload.thinking).toEqual({ type: 'enabled' });
+        expect(payload.temperature).toBe(1);
+        expect(payload.top_p).toBe(0.95);
+        expect(payload.frequency_penalty).toBe(0);
+        expect(payload.presence_penalty).toBe(0);
+      });
+
+      it('should always enable thinking for kimi-k2-thinking-turbo', async () => {
+        await instance.chat({
+          messages: [{ content: 'Hello', role: 'user' }],
+          model: 'kimi-k2-thinking-turbo',
+          temperature: 0.5,
+        });
+
+        const payload = getLastRequestPayload();
+        expect(payload.thinking).toEqual({ type: 'enabled' });
+        expect(payload.temperature).toBe(1);
+      });
+
+      it('should ignore thinking disabled for native thinking models', async () => {
+        await instance.chat({
+          messages: [{ content: 'Hello', role: 'user' }],
+          model: 'kimi-k2-thinking',
+          thinking: { budget_tokens: 0, type: 'disabled' },
+        });
+
+        const payload = getLastRequestPayload();
+        expect(payload.thinking).toEqual({ type: 'enabled' });
+        expect(payload.temperature).toBe(1);
+      });
+
+      it('should force reasoning_content on assistant messages', async () => {
+        await instance.chat({
+          messages: [
+            { content: 'Hello', role: 'user' },
+            { content: 'Response', role: 'assistant' },
+            { content: 'Follow-up', role: 'user' },
+          ],
+          model: 'kimi-k2-thinking',
+        });
+
+        const payload = getLastRequestPayload();
+        const assistantMessage = payload.messages.find(
+          (message: any) => message.role === 'assistant',
+        );
+
+        expect(assistantMessage?.reasoning_content).toBe('');
+      });
+    });
+
     describe('interleaved thinking', () => {
       it('should convert reasoning to reasoning_content for assistant messages', async () => {
         await instance.chat({
@@ -421,6 +480,75 @@ describe('LobeMoonshotAnthropicAI', () => {
         const payload = getLastRequestPayload();
 
         expect(payload.thinking).toBeUndefined();
+      });
+    });
+
+    describe('kimi-k2-thinking native thinking models', () => {
+      it('should always enable thinking for kimi-k2-thinking', async () => {
+        await instance.chat({
+          messages: [{ content: 'Hello', role: 'user' }],
+          model: 'kimi-k2-thinking',
+          temperature: 0.5,
+        });
+
+        const payload = getLastRequestPayload();
+        expect(payload.thinking).toEqual({
+          budget_tokens: 1024,
+          type: 'enabled',
+        });
+        expect(payload.temperature).toBe(1);
+        expect(payload.top_p).toBe(0.95);
+      });
+
+      it('should always enable thinking for kimi-k2-thinking-turbo', async () => {
+        await instance.chat({
+          messages: [{ content: 'Hello', role: 'user' }],
+          model: 'kimi-k2-thinking-turbo',
+          temperature: 0.5,
+        });
+
+        const payload = getLastRequestPayload();
+        expect(payload.thinking).toEqual({
+          budget_tokens: 1024,
+          type: 'enabled',
+        });
+        expect(payload.temperature).toBe(1);
+      });
+
+      it('should ignore thinking disabled for native thinking models', async () => {
+        await instance.chat({
+          messages: [{ content: 'Hello', role: 'user' }],
+          model: 'kimi-k2-thinking',
+          thinking: { budget_tokens: 0, type: 'disabled' },
+        });
+
+        const payload = getLastRequestPayload();
+        expect(payload.thinking).toEqual({
+          budget_tokens: 1024,
+          type: 'enabled',
+        });
+        expect(payload.temperature).toBe(1);
+      });
+
+      it('should force thinking block on assistant messages', async () => {
+        await instance.chat({
+          messages: [
+            { content: 'Hello', role: 'user' },
+            { content: 'Response', role: 'assistant' },
+            { content: 'Follow-up', role: 'user' },
+          ],
+          model: 'kimi-k2-thinking',
+        });
+
+        const payload = getLastRequestPayload();
+        const assistantMessage = payload.messages.find(
+          (message: any) => message.role === 'assistant',
+        );
+
+        expect(assistantMessage?.content).toEqual([
+          { type: 'thinking', thinking: ' ' },
+          { type: 'text', text: 'Response' },
+        ]);
       });
     });
 

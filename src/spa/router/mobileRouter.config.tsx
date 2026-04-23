@@ -1,14 +1,15 @@
 'use client';
 
+import { type RouteObject } from 'react-router-dom';
+
 import {
   BusinessMobileRoutesWithMainLayout,
   BusinessMobileRoutesWithoutMainLayout,
 } from '@/business/client/BusinessMobileRoutes';
-import { type RouteConfig } from '@/utils/router';
 import { dynamicElement, dynamicLayout, ErrorBoundary, redirectElement } from '@/utils/router';
 
 // Mobile router configuration (declarative mode)
-export const mobileRoutes: RouteConfig[] = [
+export const mobileRoutes: RouteObject[] = [
   {
     children: [
       // Chat routes
@@ -301,6 +302,22 @@ export const mobileRoutes: RouteConfig[] = [
     element: dynamicElement(() => import('@/routes/onboarding'), 'Mobile > Onboarding'),
     errorElement: <ErrorBoundary resetPath="/" />,
     path: '/onboarding',
+  },
+  {
+    element: dynamicElement(
+      () => import('@/routes/onboarding/agent'),
+      'Mobile > Onboarding > Agent',
+    ),
+    errorElement: <ErrorBoundary resetPath="/" />,
+    path: '/onboarding/agent',
+  },
+  {
+    element: dynamicElement(
+      () => import('@/routes/onboarding/classic'),
+      'Mobile > Onboarding > Classic',
+    ),
+    errorElement: <ErrorBoundary resetPath="/" />,
+    path: '/onboarding/classic',
   },
   ...BusinessMobileRoutesWithoutMainLayout,
 

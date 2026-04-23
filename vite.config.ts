@@ -11,6 +11,7 @@ import {
   sharedRendererPlugins,
   sharedRollupOutput,
 } from './plugins/vite/sharedRendererConfig';
+import { vercelSkewProtection } from './plugins/vite/vercelSkewProtection';
 
 const isMobile = process.env.MOBILE === 'true';
 const mode = process.env.NODE_ENV === 'production' ? 'production' : 'development';
@@ -21,9 +22,10 @@ const isDev = process.env.NODE_ENV !== 'production';
 const platform = isMobile ? 'mobile' : 'web';
 
 export default defineConfig({
-  base: isDev ? '/' : process.env.VITE_CDN_BASE || '/spa/',
+  base: isDev ? '/' : process.env.VITE_CDN_BASE || '/_spa/',
   build: {
     outDir: isMobile ? 'dist/mobile' : 'dist/desktop',
+    reportCompressedSize: false,
     rollupOptions: {
       input: resolve(__dirname, isMobile ? 'index.mobile.html' : 'index.html'),
       output: sharedRollupOutput,
@@ -32,6 +34,7 @@ export default defineConfig({
   define: sharedRendererDefine({ isMobile, isElectron: false }),
   optimizeDeps: sharedOptimizeDeps,
   plugins: [
+    vercelSkewProtection(),
     viteEnvRestartKeys(['APP_URL']),
     ...sharedRendererPlugins({ platform }),
 
@@ -39,18 +42,23 @@ export default defineConfig({
       name: 'lobe-dev-proxy-print',
       configureServer(server: ViteDevServer) {
         const ONLINE_HOST = 'https://app.lobehub.com';
-        server.httpServer?.once('listening', () => {
-          const address = server.httpServer?.address();
-          const port = typeof address === 'object' && address ? address.port : 9876;
-          const localHost = `http://localhost:${port}`;
-          const proxyUrl = `${ONLINE_HOST}/_dangerous_local_dev_proxy?debug-host=${encodeURIComponent(localHost)}`;
-
-          setTimeout(() => {
-            console.info();
-            console.info(`  \x1B[1m\x1B[35mDebug Proxy:\x1B[0m \x1B[36m${proxyUrl}\x1B[0m`);
-            console.info();
-          }, 100);
-        });
+        const c = {
+          green: (s: string) => `\x1B[32m${s}\x1B[0m`,
+          bold: (s: string) => `\x1B[1m${s}\x1B[0m`,
+          cyan: (s: string) => `\x1B[36m${s}\x1B[0m`,
+        };
+        const { info } = server.config.logger;
+        return () => {
+          server.printUrls = () => {
+            const urls = server.resolvedUrls;
+            if (!urls?.local?.[0]) return;
+            const localHost = urls.local[0].replace(/\/$/, '');
+            const proxyUrl = `${ONLINE_HOST}/_dangerous_local_dev_proxy?debug-host=${encodeURIComponent(localHost)}`;
+            const colorUrl = (url: string) =>
+              c.cyan(url.replace(/:(\d+)\//, (_, port) => `:${c.bold(port)}/`));
+            info(`  ${c.green('➜')}  ${c.bold('Debug Proxy')}: ${colorUrl(proxyUrl)}`);
+          };
+        };
       },
     },
 
@@ -101,14 +109,56 @@ export default defineConfig({
     port: 9876,
     host: true,
     proxy: {
-      '/api': 'http://localhost:3010',
-      '/oidc': 'http://localhost:3010',
-      '/trpc': 'http://localhost:3010',
-      '/webapi': 'http://localhost:3010',
+      '/api': `http://localhost:${process.env.PORT || 3010}`,
+      '/oidc': `http://localhost:${process.env.PORT || 3010}`,
+      '/trpc': `http://localhost:${process.env.PORT || 3010}`,
+      '/webapi': `http://localhost:${process.env.PORT || 3010}`,
     },
     warmup: {
       clientFiles: [
-        platform === 'mobile' ? './src/spa/entry.mobile.tsx' : './src/spa/entry.web.tsx',
+        // src/ business code
+        './src/initialize.ts',
+        './src/spa/**/*.tsx',
+        './src/business/**/*.{ts,tsx}',
+        './src/components/**/*.{ts,tsx}',
+        './src/config/**/*.ts',
+        './src/const/**/*.ts',
+        './src/envs/**/*.ts',
+        './src/features/**/*.{ts,tsx}',
+        './src/helpers/**/*.ts',
+        './src/hooks/**/*.{ts,tsx}',
+        './src/layout/**/*.{ts,tsx}',
+        './src/libs/**/*.{ts,tsx}',
+        './src/locales/**/*.ts',
+        './src/routes/**/*.{ts,tsx}',
+        './src/services/**/*.ts',
+        './src/store/**/*.{ts,tsx}',
+        './src/styles/**/*.ts',
+        './src/utils/**/*.{ts,tsx}',
+
+        // monorepo packages
+        './packages/types/src/**/*.ts',
+        './packages/const/src/**/*.ts',
+        './packages/utils/src/**/*.ts',
+        './packages/context-engine/src/**/*.ts',
+        './packages/prompts/src/**/*.ts',
+        './packages/model-bank/src/**/*.ts',
+        './packages/model-runtime/src/**/*.ts',
+        './packages/agent-runtime/src/**/*.ts',
+        './packages/conversation-flow/src/**/*.ts',
+        './packages/electron-client-ipc/src/**/*.ts',
+        './packages/builtin-agents/src/**/*.ts',
+        './packages/builtin-skills/src/**/*.ts',
+        './packages/builtin-tool-*/src/**/*.ts',
+        './packages/builtin-tools/src/**/*.ts',
+        './packages/business/*/src/**/*.ts',
+        './packages/config/src/**/*.ts',
+        './packages/edge-config/src/**/*.ts',
+        './packages/editor-runtime/src/**/*.ts',
+        './packages/fetch-sse/src/**/*.ts',
+        './packages/desktop-bridge/src/**/*.ts',
+        './packages/python-interpreter/src/**/*.ts',
+        './packages/agent-manager-runtime/src/**/*.ts',
       ],
     },
   },

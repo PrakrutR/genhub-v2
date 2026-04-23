@@ -1,5 +1,5 @@
 import { type ModelParamsSchema } from '../standard-parameters';
-import { type AIChatModelCard, type AIImageModelCard } from '../types';
+import { type AIChatModelCard, type AIImageModelCard, type AIVideoModelCard } from '../types';
 
 /**
  * gemini implicit caching not extra cost
@@ -209,55 +209,27 @@ const googleChatModels: AIChatModelCard[] = [
       functionCall: true,
       reasoning: true,
       search: true,
+      structuredOutput: true,
       video: true,
       vision: true,
     },
     contextWindowTokens: 1_048_576 + 65_536,
     description:
-      'Gemini 3 Pro is Google’s most powerful agent and vibe-coding model, delivering richer visuals and deeper interaction on top of state-of-the-art reasoning.',
-    displayName: 'Gemini 3 Pro Preview',
-    id: 'gemini-3-pro-preview',
+      "Gemini 3.1 Flash-Lite Preview is Google's most cost-efficient multimodal model, optimized for high-volume agentic tasks, translation, and data processing.",
+    displayName: 'Gemini 3.1 Flash-Lite Preview',
+    enabled: true,
+    id: 'gemini-3.1-flash-lite-preview',
     maxOutput: 65_536,
     pricing: {
       units: [
-        {
-          name: 'textInput_cacheRead',
-          strategy: 'tiered',
-          tiers: [
-            { rate: 0.2, upTo: 200_000 },
-            { rate: 0.4, upTo: 'infinity' },
-          ],
-          unit: 'millionTokens',
-        },
-        {
-          name: 'textInput',
-          strategy: 'tiered',
-          tiers: [
-            { rate: 2, upTo: 200_000 },
-            { rate: 4, upTo: 'infinity' },
-          ],
-          unit: 'millionTokens',
-        },
-        {
-          name: 'textOutput',
-          strategy: 'tiered',
-          tiers: [
-            { rate: 12, upTo: 200_000 },
-            { rate: 18, upTo: 'infinity' },
-          ],
-          unit: 'millionTokens',
-        },
-        {
-          lookup: { prices: { '1h': 4.5 }, pricingParams: ['ttl'] },
-          name: 'textInput_cacheWrite',
-          strategy: 'lookup',
-          unit: 'millionTokens',
-        },
+        { name: 'textInput_cacheRead', rate: 0.025, strategy: 'fixed', unit: 'millionTokens' },
+        { name: 'textInput', rate: 0.25, strategy: 'fixed', unit: 'millionTokens' },
+        { name: 'textOutput', rate: 1.5, strategy: 'fixed', unit: 'millionTokens' },
       ],
     },
-    releasedAt: '2025-11-18',
+    releasedAt: '2026-03-04',
     settings: {
-      extendParams: ['thinkingLevel2', 'urlContext'],
+      extendParams: ['thinkingLevel5', 'urlContext'],
       searchImpl: 'params',
       searchProvider: 'google',
     },
@@ -383,111 +355,6 @@ const googleChatModels: AIChatModelCard[] = [
     releasedAt: '2025-06-17',
     settings: {
       extendParams: ['thinkingBudget', 'urlContext'],
-      searchImpl: 'params',
-      searchProvider: 'google',
-    },
-    type: 'chat',
-  },
-  {
-    abilities: {
-      functionCall: true,
-      reasoning: true,
-      search: true,
-      video: true,
-      vision: true,
-    },
-    contextWindowTokens: 1_048_576 + 65_536,
-    description:
-      'Gemini 2.5 Pro Preview is Google’s most advanced reasoning model, able to reason over code, math, and STEM problems and analyze large datasets, codebases, and documents with long context.',
-    displayName: 'Gemini 2.5 Pro Preview 06-05',
-    id: 'gemini-2.5-pro-preview-06-05',
-    maxOutput: 65_536,
-    pricing: {
-      units: [
-        {
-          name: 'textInput_cacheRead',
-          strategy: 'tiered',
-          tiers: [
-            { rate: 0.31, upTo: 200_000 },
-            { rate: 0.625, upTo: 'infinity' },
-          ],
-          unit: 'millionTokens',
-        },
-        {
-          name: 'textInput',
-          strategy: 'tiered',
-          tiers: [
-            { rate: 1.25, upTo: 200_000 },
-            { rate: 2.5, upTo: 'infinity' },
-          ],
-          unit: 'millionTokens',
-        },
-        {
-          name: 'textOutput',
-          strategy: 'tiered',
-          tiers: [
-            { rate: 10, upTo: 200_000 },
-            { rate: 15, upTo: 'infinity' },
-          ],
-          unit: 'millionTokens',
-        },
-      ],
-    },
-    releasedAt: '2025-06-05',
-    settings: {
-      extendParams: ['thinkingBudget', 'urlContext'],
-      searchImpl: 'params',
-      searchProvider: 'google',
-    },
-    type: 'chat',
-  },
-  {
-    abilities: {
-      functionCall: true,
-      reasoning: true,
-      search: true,
-      video: true,
-      vision: true,
-    },
-    contextWindowTokens: 1_048_576 + 65_536,
-    description:
-      'Gemini 2.5 Pro Preview is Google’s most advanced reasoning model, able to reason over code, math, and STEM problems and analyze large datasets, codebases, and documents with long context.',
-    displayName: 'Gemini 2.5 Pro Preview 05-06',
-    id: 'gemini-2.5-pro-preview-05-06',
-    maxOutput: 65_536,
-    pricing: {
-      units: [
-        {
-          name: 'textInput_cacheRead',
-          strategy: 'tiered',
-          tiers: [
-            { rate: 0.31, upTo: 200_000 },
-            { rate: 0.625, upTo: 'infinity' },
-          ],
-          unit: 'millionTokens',
-        },
-        {
-          name: 'textInput',
-          strategy: 'tiered',
-          tiers: [
-            { rate: 1.25, upTo: 200_000 },
-            { rate: 2.5, upTo: 'infinity' },
-          ],
-          unit: 'millionTokens',
-        },
-        {
-          name: 'textOutput',
-          strategy: 'tiered',
-          tiers: [
-            { rate: 10, upTo: 200_000 },
-            { rate: 15, upTo: 'infinity' },
-          ],
-          unit: 'millionTokens',
-        },
-      ],
-    },
-    releasedAt: '2025-05-06',
-    settings: {
       searchImpl: 'params',
       searchProvider: 'google',
     },
@@ -656,25 +523,6 @@ const googleChatModels: AIChatModelCard[] = [
       searchImpl: 'params',
       searchProvider: 'google',
     },
-    type: 'chat',
-  },
-  {
-    abilities: {
-      imageOutput: true,
-      vision: true,
-    },
-    contextWindowTokens: 1_048_576 + 8192,
-    description: 'Gemini 2.0 Flash experimental model with image generation support.',
-    displayName: 'Gemini 2.0 Flash (Image Generation) Experimental',
-    id: 'gemini-2.0-flash-exp-image-generation',
-    maxOutput: 8192,
-    pricing: {
-      units: [
-        { name: 'textInput', rate: 0, strategy: 'fixed', unit: 'millionTokens' },
-        { name: 'textOutput', rate: 0, strategy: 'fixed', unit: 'millionTokens' },
-      ],
-    },
-    releasedAt: '2025-03-14',
     type: 'chat',
   },
   {
@@ -871,6 +719,7 @@ export const imagenGenParameters: ModelParamsSchema = {
 };
 
 const NANO_BANANA_ASPECT_RATIOS = [
+  'auto',
   '1:1', // 1024x1024 / 2048x2048 / 4096x4096
   '2:3', // 848x1264 / 1696x2528 / 3392x5056
   '3:2', // 1264x848 / 2528x1696 / 5056x3392
@@ -887,7 +736,7 @@ const NANO_BANANA_2_ASPECT_RATIOS = [...NANO_BANANA_ASPECT_RATIOS, '1:4', '4:1',
 
 export const nanoBananaParameters: ModelParamsSchema = {
   aspectRatio: {
-    default: '1:1',
+    default: 'auto',
     enum: NANO_BANANA_ASPECT_RATIOS,
   },
   imageUrls: {
@@ -898,7 +747,7 @@ export const nanoBananaParameters: ModelParamsSchema = {
 
 export const nanoBananaProParameters: ModelParamsSchema = {
   aspectRatio: {
-    default: '1:1',
+    default: 'auto',
     enum: NANO_BANANA_ASPECT_RATIOS,
   },
   imageUrls: {
@@ -913,7 +762,7 @@ export const nanoBananaProParameters: ModelParamsSchema = {
 
 export const nanoBanana2Parameters: ModelParamsSchema = {
   aspectRatio: {
-    default: '1:1',
+    default: 'auto',
     enum: NANO_BANANA_2_ASPECT_RATIOS,
   },
   imageUrls: {
@@ -1020,6 +869,157 @@ const googleImageModels: AIImageModelCard[] = [
     },
   },
 ];
-export const allModels = [...googleChatModels, ...googleImageModels];
+
+const googleVideoModels: AIVideoModelCard[] = [
+  {
+    description:
+      'Our latest video generation model, available to developers on the paid tier of the Gemini API.',
+    displayName: 'Veo 3.1 Generate Preview',
+    enabled: true,
+    id: 'veo-3.1-generate-preview',
+    parameters: {
+      aspectRatio: {
+        default: '16:9',
+        enum: ['16:9', '9:16'],
+      },
+      duration: { default: 8, enum: [4, 6, 8] },
+      endImageUrl: {
+        default: null,
+      },
+      imageUrls: {
+        default: [],
+        maxCount: 3,
+      },
+      prompt: { default: '' },
+      resolution: {
+        default: '720p',
+        enum: ['720p', '1080p', '4k'],
+      },
+      seed: { default: null },
+    },
+    pricing: {
+      units: [{ name: 'videoGeneration', rate: 0.6, strategy: 'fixed', unit: 'second' }],
+    },
+    releasedAt: '2026-01-13',
+    type: 'video',
+  },
+  {
+    description:
+      'Our latest video generation model, available to developers on the paid tier of the Gemini API.',
+    displayName: 'Veo 3.1 Fast Generate Preview',
+    enabled: true,
+    id: 'veo-3.1-fast-generate-preview',
+    parameters: {
+      aspectRatio: {
+        default: '16:9',
+        enum: ['16:9', '9:16'],
+      },
+      duration: { default: 8, enum: [4, 6, 8] },
+      endImageUrl: {
+        default: null,
+      },
+      imageUrls: {
+        default: [],
+        maxCount: 3,
+      },
+      prompt: { default: '' },
+      resolution: {
+        default: '720p',
+        enum: ['720p', '1080p', '4k'],
+      },
+      seed: { default: null },
+    },
+    pricing: {
+      units: [{ name: 'videoGeneration', rate: 0.35, strategy: 'fixed', unit: 'second' }],
+    },
+    releasedAt: '2026-01-13',
+    type: 'video',
+  },
+  {
+    description:
+      'Our stable video generation model, available to developers on the paid tier of the Gemini API.',
+    displayName: 'Veo 3.0 Generate 001',
+    enabled: true,
+    id: 'veo-3.0-generate-001',
+    parameters: {
+      aspectRatio: {
+        default: '16:9',
+        enum: ['16:9', '9:16'],
+      },
+      duration: { default: 8, enum: [8] },
+      imageUrl: {
+        default: null,
+      },
+      prompt: { default: '' },
+      resolution: {
+        default: '720p',
+        enum: ['720p', '1080p'],
+      },
+      seed: { default: null },
+    },
+    pricing: {
+      units: [{ name: 'videoGeneration', rate: 0.4, strategy: 'fixed', unit: 'second' }],
+    },
+    releasedAt: '2025-11-11',
+    type: 'video',
+  },
+  {
+    description:
+      'Our stable video generation model, available to developers on the paid tier of the Gemini API.',
+    displayName: 'Veo 3.0 Fast Generate 001',
+    enabled: true,
+    id: 'veo-3.0-fast-generate-001',
+    parameters: {
+      aspectRatio: {
+        default: '16:9',
+        enum: ['16:9', '9:16'],
+      },
+      duration: { default: 8, enum: [8] },
+      imageUrl: {
+        default: null,
+      },
+      prompt: { default: '' },
+      resolution: {
+        default: '720p',
+        enum: ['720p', '1080p'],
+      },
+      seed: { default: null },
+    },
+    pricing: {
+      units: [{ name: 'videoGeneration', rate: 0.15, strategy: 'fixed', unit: 'second' }],
+    },
+    releasedAt: '2025-11-11',
+    type: 'video',
+  },
+  {
+    description:
+      'Our state-of-the-art video generation model, available to developers on the paid tier of the Gemini API.',
+    displayName: 'Veo 2.0 Generate 001',
+    id: 'veo-2.0-generate-001',
+    parameters: {
+      aspectRatio: {
+        default: '16:9',
+        enum: ['16:9', '9:16'],
+      },
+      duration: { default: 8, max: 8, min: 5 },
+      imageUrl: {
+        default: null,
+      },
+      prompt: { default: '' },
+      resolution: {
+        default: '720p',
+        enum: ['720p', '1080p'],
+      },
+      seed: { default: null },
+    },
+    pricing: {
+      units: [{ name: 'videoGeneration', rate: 0.35, strategy: 'fixed', unit: 'second' }],
+    },
+    releasedAt: '2025-04-09',
+    type: 'video',
+  },
+];
+
+export const allModels = [...googleChatModels, ...googleImageModels, ...googleVideoModels];
 
 export default allModels;

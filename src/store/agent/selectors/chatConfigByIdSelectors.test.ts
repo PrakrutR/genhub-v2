@@ -13,6 +13,8 @@ vi.mock('@lobechat/model-runtime', () => ({
   isThinkingWithToolClaudeModel: vi.fn((model) => model === 'claude-3-7-sonnet'),
 }));
 
+// isDesktop defaults to false in test environment (no __ELECTRON__)
+
 const createState = (overrides: Partial<AgentStoreState> = {}): AgentStoreState => ({
   ...initialAgentSliceState,
   ...initialBuiltinAgentSliceState,
@@ -59,7 +61,7 @@ describe('chatConfigByIdSelectors', () => {
   });
 
   describe('getEnableHistoryCountById', () => {
-    it('should return false when context caching enabled and model supports it', () => {
+    it('should return enableHistoryCount value even when context caching is enabled', () => {
       const state = createState({
         agentMap: {
           'agent-1': {
@@ -69,10 +71,10 @@ describe('chatConfigByIdSelectors', () => {
         },
       });
 
-      expect(chatConfigByIdSelectors.getEnableHistoryCountById('agent-1')(state)).toBe(false);
+      expect(chatConfigByIdSelectors.getEnableHistoryCountById('agent-1')(state)).toBe(true);
     });
 
-    it('should return false when search enabled and model is claude-3-7-sonnet', () => {
+    it('should return enableHistoryCount value even when search is enabled', () => {
       const state = createState({
         agentMap: {
           'agent-1': {
@@ -86,10 +88,10 @@ describe('chatConfigByIdSelectors', () => {
         },
       });
 
-      expect(chatConfigByIdSelectors.getEnableHistoryCountById('agent-1')(state)).toBe(false);
+      expect(chatConfigByIdSelectors.getEnableHistoryCountById('agent-1')(state)).toBe(true);
     });
 
-    it('should return enableHistoryCount value when no special cases apply', () => {
+    it('should return enableHistoryCount value directly from config', () => {
       const state = createState({
         agentMap: {
           'agent-1': {
@@ -114,7 +116,7 @@ describe('chatConfigByIdSelectors', () => {
             model: 'gpt-4',
           },
           'agent-2': {
-            chatConfig: { disableContextCaching: false, enableHistoryCount: true },
+            chatConfig: { disableContextCaching: false, enableHistoryCount: false },
             model: 'claude-3-5-sonnet',
           },
         },
@@ -249,7 +251,7 @@ describe('chatConfigByIdSelectors', () => {
     });
   });
 
-  describe('getMemoryConfigById', () => {
+  describe('getMemoryToolConfigById', () => {
     it('should return memory config for specified agent', () => {
       const state = createState({
         agentMap: {
@@ -261,7 +263,7 @@ describe('chatConfigByIdSelectors', () => {
         },
       });
 
-      expect(chatConfigByIdSelectors.getMemoryConfigById('agent-1')(state)).toEqual({
+      expect(chatConfigByIdSelectors.getMemoryToolConfigById('agent-1')(state)).toEqual({
         effort: 'high',
         enabled: true,
         toolPermission: 'read-write',
@@ -273,7 +275,7 @@ describe('chatConfigByIdSelectors', () => {
         agentMap: { 'agent-1': {} },
       });
 
-      expect(chatConfigByIdSelectors.getMemoryConfigById('agent-1')(state)).toBeUndefined();
+      expect(chatConfigByIdSelectors.getMemoryToolConfigById('agent-1')(state)).toBeUndefined();
     });
 
     it('should return undefined for non-existent agent', () => {
@@ -281,11 +283,13 @@ describe('chatConfigByIdSelectors', () => {
         agentMap: {},
       });
 
-      expect(chatConfigByIdSelectors.getMemoryConfigById('non-existent')(state)).toBeUndefined();
+      expect(
+        chatConfigByIdSelectors.getMemoryToolConfigById('non-existent')(state),
+      ).toBeUndefined();
     });
   });
 
-  describe('isMemoryEnabledById', () => {
+  describe('isMemoryToolEnabledById', () => {
     it('should return true when memory is enabled', () => {
       const state = createState({
         agentMap: {
@@ -293,7 +297,7 @@ describe('chatConfigByIdSelectors', () => {
         },
       });
 
-      expect(chatConfigByIdSelectors.isMemoryEnabledById('agent-1')(state)).toBe(true);
+      expect(chatConfigByIdSelectors.isMemoryToolEnabledById('agent-1')(state)).toBe(true);
     });
 
     it('should return false when memory is explicitly disabled', () => {
@@ -303,7 +307,7 @@ describe('chatConfigByIdSelectors', () => {
         },
       });
 
-      expect(chatConfigByIdSelectors.isMemoryEnabledById('agent-1')(state)).toBe(false);
+      expect(chatConfigByIdSelectors.isMemoryToolEnabledById('agent-1')(state)).toBe(false);
     });
 
     it('should return false when memory config is not set (default)', () => {
@@ -311,7 +315,7 @@ describe('chatConfigByIdSelectors', () => {
         agentMap: { 'agent-1': {} },
       });
 
-      expect(chatConfigByIdSelectors.isMemoryEnabledById('agent-1')(state)).toBe(false);
+      expect(chatConfigByIdSelectors.isMemoryToolEnabledById('agent-1')(state)).toBe(false);
     });
 
     it('should return false when memory exists but enabled is not set', () => {
@@ -321,7 +325,7 @@ describe('chatConfigByIdSelectors', () => {
         },
       });
 
-      expect(chatConfigByIdSelectors.isMemoryEnabledById('agent-1')(state)).toBe(false);
+      expect(chatConfigByIdSelectors.isMemoryToolEnabledById('agent-1')(state)).toBe(false);
     });
 
     it('should return false for non-existent agent', () => {
@@ -329,7 +333,7 @@ describe('chatConfigByIdSelectors', () => {
         agentMap: {},
       });
 
-      expect(chatConfigByIdSelectors.isMemoryEnabledById('non-existent')(state)).toBe(false);
+      expect(chatConfigByIdSelectors.isMemoryToolEnabledById('non-existent')(state)).toBe(false);
     });
 
     it('should work with different agents independently', () => {
@@ -341,13 +345,13 @@ describe('chatConfigByIdSelectors', () => {
         },
       });
 
-      expect(chatConfigByIdSelectors.isMemoryEnabledById('agent-1')(state)).toBe(true);
-      expect(chatConfigByIdSelectors.isMemoryEnabledById('agent-2')(state)).toBe(false);
-      expect(chatConfigByIdSelectors.isMemoryEnabledById('agent-3')(state)).toBe(false);
+      expect(chatConfigByIdSelectors.isMemoryToolEnabledById('agent-1')(state)).toBe(true);
+      expect(chatConfigByIdSelectors.isMemoryToolEnabledById('agent-2')(state)).toBe(false);
+      expect(chatConfigByIdSelectors.isMemoryToolEnabledById('agent-3')(state)).toBe(false);
     });
   });
 
-  describe('getMemoryEffortById', () => {
+  describe('getMemoryToolEffortById', () => {
     it('should return effort level for specified agent', () => {
       const state = createState({
         agentMap: {
@@ -355,7 +359,7 @@ describe('chatConfigByIdSelectors', () => {
         },
       });
 
-      expect(chatConfigByIdSelectors.getMemoryEffortById('agent-1')(state)).toBe('high');
+      expect(chatConfigByIdSelectors.getMemoryToolEffortById('agent-1')(state)).toBe('high');
     });
 
     it('should return "medium" as default when effort is not set', () => {
@@ -365,7 +369,7 @@ describe('chatConfigByIdSelectors', () => {
         },
       });
 
-      expect(chatConfigByIdSelectors.getMemoryEffortById('agent-1')(state)).toBe('medium');
+      expect(chatConfigByIdSelectors.getMemoryToolEffortById('agent-1')(state)).toBe('medium');
     });
 
     it('should return "medium" when memory config is not set', () => {
@@ -373,7 +377,7 @@ describe('chatConfigByIdSelectors', () => {
         agentMap: { 'agent-1': {} },
       });
 
-      expect(chatConfigByIdSelectors.getMemoryEffortById('agent-1')(state)).toBe('medium');
+      expect(chatConfigByIdSelectors.getMemoryToolEffortById('agent-1')(state)).toBe('medium');
     });
 
     it('should return "medium" for non-existent agent', () => {
@@ -381,7 +385,7 @@ describe('chatConfigByIdSelectors', () => {
         agentMap: {},
       });
 
-      expect(chatConfigByIdSelectors.getMemoryEffortById('non-existent')(state)).toBe('medium');
+      expect(chatConfigByIdSelectors.getMemoryToolEffortById('non-existent')(state)).toBe('medium');
     });
 
     it('should return each effort level correctly', () => {
@@ -393,9 +397,9 @@ describe('chatConfigByIdSelectors', () => {
         },
       });
 
-      expect(chatConfigByIdSelectors.getMemoryEffortById('agent-low')(state)).toBe('low');
-      expect(chatConfigByIdSelectors.getMemoryEffortById('agent-medium')(state)).toBe('medium');
-      expect(chatConfigByIdSelectors.getMemoryEffortById('agent-high')(state)).toBe('high');
+      expect(chatConfigByIdSelectors.getMemoryToolEffortById('agent-low')(state)).toBe('low');
+      expect(chatConfigByIdSelectors.getMemoryToolEffortById('agent-medium')(state)).toBe('medium');
+      expect(chatConfigByIdSelectors.getMemoryToolEffortById('agent-high')(state)).toBe('high');
     });
   });
 
@@ -423,6 +427,129 @@ describe('chatConfigByIdSelectors', () => {
       expect(chatConfigByIdSelectors.getSearchFCModelById('agent-1')(state)).toStrictEqual(
         DEFAULT_AGENT_SEARCH_FC_MODEL,
       );
+    });
+  });
+
+  describe('getRuntimeEnvConfigById', () => {
+    it('should return runtimeEnv config for specified agent', () => {
+      const state = createState({
+        agentMap: {
+          'agent-1': {
+            chatConfig: {
+              runtimeEnv: { runtimeMode: { web: 'cloud' }, workingDirectory: '/home' },
+            },
+          },
+        },
+      });
+
+      expect(chatConfigByIdSelectors.getRuntimeEnvConfigById('agent-1')(state)).toEqual({
+        runtimeMode: { web: 'cloud' },
+        workingDirectory: '/home',
+      });
+    });
+
+    it('should return undefined when runtimeEnv is not set', () => {
+      const state = createState({
+        agentMap: { 'agent-1': {} },
+      });
+
+      expect(chatConfigByIdSelectors.getRuntimeEnvConfigById('agent-1')(state)).toBeUndefined();
+    });
+  });
+
+  // In test environment, isDesktop is false (no __ELECTRON__), so CURRENT_PLATFORM = 'web'
+  describe('getRuntimeModeById (web platform)', () => {
+    it('should return web runtime mode when set', () => {
+      const state = createState({
+        agentMap: {
+          'agent-1': {
+            chatConfig: { runtimeEnv: { runtimeMode: { web: 'cloud' } } },
+          },
+        },
+      });
+
+      expect(chatConfigByIdSelectors.getRuntimeModeById('agent-1')(state)).toBe('cloud');
+    });
+
+    it('should default to "none" on web when not set', () => {
+      const state = createState({
+        agentMap: { 'agent-1': {} },
+      });
+
+      expect(chatConfigByIdSelectors.getRuntimeModeById('agent-1')(state)).toBe('none');
+    });
+
+    it('should default to "none" for non-existent agent', () => {
+      const state = createState({ agentMap: {} });
+
+      expect(chatConfigByIdSelectors.getRuntimeModeById('non-existent')(state)).toBe('none');
+    });
+
+    it('should ignore desktop runtime mode on web', () => {
+      const state = createState({
+        agentMap: {
+          'agent-1': {
+            chatConfig: { runtimeEnv: { runtimeMode: { desktop: 'local' } } },
+          },
+        },
+      });
+
+      // desktop is set but web is not, should fall back to web default
+      expect(chatConfigByIdSelectors.getRuntimeModeById('agent-1')(state)).toBe('none');
+    });
+
+    it('should read correct platform when both are set', () => {
+      const state = createState({
+        agentMap: {
+          'agent-1': {
+            chatConfig: {
+              runtimeEnv: { runtimeMode: { desktop: 'local', web: 'cloud' } },
+            },
+          },
+        },
+      });
+
+      expect(chatConfigByIdSelectors.getRuntimeModeById('agent-1')(state)).toBe('cloud');
+    });
+
+    it('should work with different agents independently', () => {
+      const state = createState({
+        agentMap: {
+          'agent-1': {
+            chatConfig: { runtimeEnv: { runtimeMode: { web: 'cloud' } } },
+          },
+          'agent-2': {
+            chatConfig: { runtimeEnv: { runtimeMode: { web: 'none' } } },
+          },
+          'agent-3': { chatConfig: {} },
+        },
+      });
+
+      expect(chatConfigByIdSelectors.getRuntimeModeById('agent-1')(state)).toBe('cloud');
+      expect(chatConfigByIdSelectors.getRuntimeModeById('agent-2')(state)).toBe('none');
+      expect(chatConfigByIdSelectors.getRuntimeModeById('agent-3')(state)).toBe('none');
+    });
+  });
+
+  describe('isLocalSystemEnabledById', () => {
+    it('should return false on web even with desktop set to local', () => {
+      const state = createState({
+        agentMap: {
+          'agent-1': {
+            chatConfig: { runtimeEnv: { runtimeMode: { desktop: 'local' } } },
+          },
+        },
+      });
+
+      expect(chatConfigByIdSelectors.isLocalSystemEnabledById('agent-1')(state)).toBe(false);
+    });
+
+    it('should return false when not set (web defaults to none)', () => {
+      const state = createState({
+        agentMap: { 'agent-1': {} },
+      });
+
+      expect(chatConfigByIdSelectors.isLocalSystemEnabledById('agent-1')(state)).toBe(false);
     });
   });
 });

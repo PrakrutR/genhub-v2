@@ -279,6 +279,88 @@ describe('AsyncTaskModel', () => {
       expect(updatedTask?.error).toBeNull();
     });
   });
+
+  describe('isUserMemoryExtractionCancellationRequested', () => {
+    it('should return true when cancellation is requested for current user memory extraction task', async () => {
+      const [task] = await serverDB
+        .insert(asyncTasks)
+        .values({
+          metadata: {
+            control: {
+              cancelRequestedAt: new Date().toISOString(),
+            },
+            progress: {
+              completedTopics: 0,
+              totalTopics: 1,
+            },
+            source: 'chat_topic',
+          },
+          status: AsyncTaskStatus.Processing,
+          type: AsyncTaskType.UserMemoryExtractionWithChatTopic,
+          userId,
+        })
+        .returning();
+
+      const requested = await asyncTaskModel.isUserMemoryExtractionCancellationRequested(task.id);
+
+      expect(requested).toBe(true);
+    });
+
+    it('should return false when task is not user memory extraction type', async () => {
+      const [task] = await serverDB
+        .insert(asyncTasks)
+        .values({
+          metadata: {
+            control: {
+              cancelRequestedAt: new Date().toISOString(),
+            },
+            progress: {
+              completedTopics: 0,
+              totalTopics: 1,
+            },
+            source: 'chat_topic',
+          },
+          status: AsyncTaskStatus.Processing,
+          type: AsyncTaskType.Chunking,
+          userId,
+        })
+        .returning();
+
+      const requested = await asyncTaskModel.isUserMemoryExtractionCancellationRequested(task.id);
+
+      expect(requested).toBe(false);
+    });
+
+    it('should return false when task belongs to another user', async () => {
+      const otherUserId = 'other-user-for-cancel-test';
+      await serverDB.insert(users).values([{ id: otherUserId }]);
+
+      const [task] = await serverDB
+        .insert(asyncTasks)
+        .values({
+          metadata: {
+            control: {
+              cancelRequestedAt: new Date().toISOString(),
+            },
+            progress: {
+              completedTopics: 0,
+              totalTopics: 1,
+            },
+            source: 'chat_topic',
+          },
+          status: AsyncTaskStatus.Processing,
+          type: AsyncTaskType.UserMemoryExtractionWithChatTopic,
+          userId: otherUserId,
+        })
+        .returning();
+
+      const requested = await asyncTaskModel.isUserMemoryExtractionCancellationRequested(task.id);
+
+      expect(requested).toBe(false);
+
+      await serverDB.delete(users).where(eq(users.id, otherUserId));
+    });
+  });
 });
 
 describe('initUserMemoryExtractionMetadata', () => {
@@ -286,6 +368,7 @@ describe('initUserMemoryExtractionMetadata', () => {
     const result = initUserMemoryExtractionMetadata(undefined);
 
     expect(result).toEqual({
+      control: undefined,
       progress: {
         completedTopics: 0,
         totalTopics: null,
@@ -299,6 +382,7 @@ describe('initUserMemoryExtractionMetadata', () => {
     const result = initUserMemoryExtractionMetadata();
 
     expect(result).toEqual({
+      control: undefined,
       progress: {
         completedTopics: 0,
         totalTopics: null,
@@ -318,6 +402,7 @@ describe('initUserMemoryExtractionMetadata', () => {
     });
 
     expect(result).toEqual({
+      control: undefined,
       progress: {
         completedTopics: 5,
         totalTopics: 10,
@@ -339,6 +424,7 @@ describe('initUserMemoryExtractionMetadata', () => {
     });
 
     expect(result).toEqual({
+      control: undefined,
       progress: {
         completedTopics: 3,
         totalTopics: 7,
@@ -379,5 +465,31 @@ describe('initUserMemoryExtractionMetadata', () => {
     } as any);
 
     expect(result.source).toBe('chat_topic');
+  });
+});
+
+describe('AsyncTaskModel.findByInferenceId', () => {
+  it('should find a task by inferenceId', async () => {
+    const [task] = await serverDB
+      .insert(asyncTasks)
+      .values({
+        status: AsyncTaskStatus.Processing,
+        userId,
+        inferenceId: 'inference-123',
+        type: AsyncTaskType.UserMemoryExtractionWithChatTopic,
+      })
+      .returning();
+
+    const result = await AsyncTaskModel.findByInferenceId(serverDB, 'inference-123');
+    expect(result).toBeDefined();
+    expect(result?.id).toBe(task.id);
+  });
+
+  it('should return undefined for non-existent inferenceId', async () => {
+    const result = await AsyncTaskModel.findByInferenceId(
+      serverDB,
+      '00000000-0000-0000-0000-000000000000',
+    );
+    expect(result).toBeUndefined();
   });
 });

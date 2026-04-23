@@ -1,88 +1,25 @@
 'use client';
 
 import { Flexbox, Tag } from '@lobehub/ui';
-import { HomeIcon, SearchIcon } from 'lucide-react';
-import { memo, useMemo } from 'react';
+import { memo } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Link, useNavigate } from 'react-router-dom';
 
-import { getRouteById } from '@/config/routes';
 import { type NavItemProps } from '@/features/NavPanel/components/NavItem';
 import NavItem from '@/features/NavPanel/components/NavItem';
 import { useActiveTabKey } from '@/hooks/useActiveTabKey';
-import { useGlobalStore } from '@/store/global';
-import { SidebarTabKey } from '@/store/global/initialState';
-import {
-  featureFlagsSelectors,
-  serverConfigSelectors,
-  useServerConfigStore,
-} from '@/store/serverConfig';
+import { useNavLayout } from '@/hooks/useNavLayout';
 import { isModifierClick } from '@/utils/navigation';
+import { prefetchRoute } from '@/utils/router';
 
-interface Item {
-  hidden?: boolean | undefined;
-  icon: NavItemProps['icon'];
-  isNew?: boolean;
-  key: string;
-  onClick?: () => void;
-  title: NavItemProps['title'];
-  url?: string;
-}
+/** Keys that are rendered in the header; all others are managed by Body via sidebarSectionOrder */
+const HEADER_KEYS = new Set(['home', 'search']);
 
 const Nav = memo(() => {
   const tab = useActiveTabKey();
   const navigate = useNavigate();
   const { t } = useTranslation('common');
-  const toggleCommandMenu = useGlobalStore((s) => s.toggleCommandMenu);
-  const { showMarket, showAiImage } = useServerConfigStore(featureFlagsSelectors);
-  const enableBusinessFeatures = useServerConfigStore(serverConfigSelectors.enableBusinessFeatures);
-
-  const items: Item[] = useMemo(
-    () => [
-      {
-        icon: SearchIcon,
-        key: 'search',
-        onClick: () => {
-          toggleCommandMenu(true);
-        },
-        title: t('tab.search'),
-      },
-      {
-        icon: HomeIcon,
-        key: SidebarTabKey.Home,
-        title: t('tab.home'),
-        url: '/',
-      },
-      {
-        icon: getRouteById('page')!.icon,
-        key: SidebarTabKey.Pages,
-        title: t('tab.pages'),
-        url: '/page',
-      },
-      {
-        hidden: !enableBusinessFeatures,
-        icon: getRouteById('video')!.icon,
-        key: SidebarTabKey.Video,
-        title: t('tab.video'),
-        url: '/video',
-      },
-      {
-        hidden: !showAiImage,
-        icon: getRouteById('image')!.icon,
-        key: SidebarTabKey.Image,
-        title: t('tab.aiImage'),
-        url: '/image',
-      },
-      {
-        hidden: !showMarket,
-        icon: getRouteById('community')!.icon,
-        key: SidebarTabKey.Community,
-        title: t('tab.community'),
-        url: '/community',
-      },
-    ],
-    [t],
-  );
+  const { topNavItems: items } = useNavLayout();
 
   const newBadge = (
     <Tag color="blue" size="small">
@@ -92,44 +29,42 @@ const Nav = memo(() => {
 
   return (
     <Flexbox gap={1} paddingInline={4}>
-      {items.map((item) => {
-        const extra = item.isNew ? newBadge : undefined;
-        const content = (
-          <NavItem
-            active={tab === item.key}
-            extra={extra}
-            hidden={item.hidden}
-            icon={item.icon}
-            key={item.key}
-            title={item.title}
-            onClick={item.onClick}
-          />
-        );
-        if (!item.url) return content;
+      {items
+        .filter((item) => HEADER_KEYS.has(item.key))
+        .map((item) => {
+          const extra = item.isNew ? newBadge : undefined;
 
-        return (
-          <Link
-            key={item.key}
-            to={item.url}
-            onClick={(e) => {
-              if (isModifierClick(e)) return;
-              e.preventDefault();
-              item?.onClick?.();
-              if (item.url) {
-                navigate(item.url);
-              }
-            }}
-          >
+          const navItem = (
             <NavItem
               active={tab === item.key}
               extra={extra}
               hidden={item.hidden}
-              icon={item.icon}
+              icon={item.icon as NavItemProps['icon']}
               title={item.title}
+              onClick={item.onClick}
             />
-          </Link>
-        );
-      })}
+          );
+
+          if (!item.url) return <div key={item.key}>{navItem}</div>;
+
+          return (
+            <Link
+              key={item.key}
+              to={item.url}
+              onMouseEnter={() => prefetchRoute(item.url!)}
+              onClick={(e) => {
+                if (isModifierClick(e)) return;
+                e.preventDefault();
+                item?.onClick?.();
+                if (item.url) {
+                  navigate(item.url);
+                }
+              }}
+            >
+              {navItem}
+            </Link>
+          );
+        })}
     </Flexbox>
   );
 });

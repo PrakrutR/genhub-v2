@@ -1,6 +1,6 @@
 import { z } from 'zod';
 
-import type { PageSelection} from './pageSelection';
+import type { PageSelection } from './pageSelection';
 import { PageSelectionSchema } from './pageSelection';
 
 export interface ModelTokensUsage {
@@ -25,6 +25,10 @@ export interface ModelTokensUsage {
   inputImageTokens?: number;
   inputTextTokens?: number;
 
+  /**
+   * tool use prompt tokens (Google AI / Vertex AI)
+   */
+  inputToolTokens?: number;
   inputWriteCacheTokens?: number;
   outputAudioTokens?: number;
   outputImageTokens?: number;
@@ -50,6 +54,7 @@ export const ModelUsageSchema = z.object({
   inputImageTokens: z.number().optional(),
   inputAudioTokens: z.number().optional(),
   inputCitationTokens: z.number().optional(),
+  inputToolTokens: z.number().optional(),
 
   // Output tokens breakdown
   outputTextTokens: z.number().optional(),
@@ -100,6 +105,7 @@ export const MessageMetadataSchema = ModelUsageSchema.merge(ModelPerformanceSche
   reactions: z.array(EmojiReactionSchema).optional(),
   scope: z.string().optional(),
   subAgentId: z.string().optional(),
+  toolExecutionTimeMs: z.number().optional(),
 });
 
 export interface ModelUsage extends ModelTokensUsage {
@@ -188,5 +194,9 @@ export interface MessageMetadata extends ModelUsage, ModelPerformance {
   taskTitle?: string;
   // message content is multimodal, display content in the streaming, won't save to db
   tempDisplayContent?: string;
+  /**
+   * Tool execution time for tool messages (ms)
+   */
+  toolExecutionTimeMs?: number;
   usage?: ModelUsage;
 }
