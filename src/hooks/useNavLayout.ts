@@ -35,7 +35,8 @@ export interface NavLayout {
 export const useNavLayout = (): NavLayout => {
   const { t } = useTranslation('common');
   const toggleCommandMenu = useGlobalStore((s) => s.toggleCommandMenu);
-  const { showMarket, showAiImage, hideGitHub } = useServerConfigStore(featureFlagsSelectors);
+  const { showMarket, showAiImage, hideGitHub, enableAgentTask } =
+    useServerConfigStore(featureFlagsSelectors);
 
   const topNavItems = useMemo(
     () =>
@@ -51,6 +52,13 @@ export const useNavLayout = (): NavLayout => {
           key: SidebarTabKey.Home,
           title: t('tab.home'),
           url: '/',
+        },
+        {
+          hidden: !enableAgentTask,
+          icon: getRouteById('tasks')!.icon,
+          key: SidebarTabKey.Tasks,
+          title: t('tab.tasks'),
+          url: '/tasks',
         },
         {
           icon: getRouteById('page')!.icon,
@@ -72,7 +80,7 @@ export const useNavLayout = (): NavLayout => {
           url: '/video',
         },
       ] as NavItem[],
-    [t, toggleCommandMenu, showAiImage],
+    [t, toggleCommandMenu, showAiImage, enableAgentTask],
   );
 
   const bottomMenuItems = useMemo(
