@@ -2,6 +2,10 @@ import {
   AgentBuilderInterventions,
   AgentBuilderManifest,
 } from '@lobechat/builtin-tool-agent-builder/client';
+import {
+  AgentMarketplaceInterventions,
+  AgentMarketplaceManifest,
+} from '@lobechat/builtin-tool-agent-marketplace/client';
 import { CloudSandboxManifest } from '@lobechat/builtin-tool-cloud-sandbox';
 import { CloudSandboxInterventions } from '@lobechat/builtin-tool-cloud-sandbox/client';
 import {
@@ -34,6 +38,7 @@ import { type BuiltinIntervention } from '@lobechat/types';
  */
 export const BuiltinToolInterventions: Record<string, Record<string, any>> = {
   [AgentBuilderManifest.identifier]: AgentBuilderInterventions,
+  [AgentMarketplaceManifest.identifier]: AgentMarketplaceInterventions,
   [CloudSandboxManifest.identifier]: CloudSandboxInterventions,
   [GroupManagementManifest.identifier]: GroupManagementInterventions,
   [GTDManifest.identifier]: GTDInterventions,
@@ -44,6 +49,23 @@ export const BuiltinToolInterventions: Record<string, Record<string, any>> = {
   [UserInteractionIdentifier]: UserInteractionInterventions,
   [WebOnboardingManifest.identifier]: WebOnboardingInterventions,
 };
+
+export interface BuiltinInterventionRegistryEntry {
+  apiName: string;
+  identifier: string;
+  intervention: BuiltinIntervention;
+}
+
+export const listBuiltinInterventionEntries = (): BuiltinInterventionRegistryEntry[] =>
+  Object.entries(BuiltinToolInterventions).flatMap(([identifier, toolset]) =>
+    Object.entries(toolset)
+      .filter((entry): entry is [string, BuiltinIntervention] => !!entry[1])
+      .map(([apiName, intervention]) => ({
+        apiName,
+        identifier,
+        intervention,
+      })),
+  );
 
 /**
  * Get builtin intervention component for a specific API

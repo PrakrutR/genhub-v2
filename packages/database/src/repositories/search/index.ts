@@ -67,6 +67,11 @@ export interface ChatGroupSearchResult extends BaseSearchResult {
 }
 
 export interface TopicSearchResult extends BaseSearchResult {
+  agent: {
+    avatar: string | null;
+    backgroundColor: string | null;
+    title: string | null;
+  } | null;
   agentId: string | null;
   favorite: boolean | null;
   sessionId: string | null;
@@ -495,7 +500,16 @@ export class SearchRepo {
     const ilikeQuery = `%${sanitizeIlikeQuery(query)}%`;
     const rows = await this.db
       .select({
+        // agents.id is selected as a sentinel: non-null only when the JOIN
+        // matched an agent owned by this user. Topics carrying an agentId
+        // that points to another user's agent (possible via migrated/crafted
+        // data) yield null here, so the renderer falls back to the
+        // agent-less subtitle and never surfaces foreign metadata.
+        agentAvatar: agents.avatar,
+        agentBackgroundColor: agents.backgroundColor,
         agentId: topics.agentId,
+        agentMatchedId: agents.id,
+        agentTitle: agents.title,
         content: topics.content,
         createdAt: topics.createdAt,
         favorite: topics.favorite,
@@ -505,6 +519,7 @@ export class SearchRepo {
         updatedAt: topics.updatedAt,
       })
       .from(topics)
+      .leftJoin(agents, and(eq(topics.agentId, agents.id), eq(agents.userId, this.userId)))
       .where(
         and(
           eq(topics.userId, this.userId),
@@ -519,7 +534,14 @@ export class SearchRepo {
       .orderBy(desc(topics.updatedAt))
       .limit(limit);
 
-    return rows.map((row) => ({
+    return this.mapScoresToRelevance(rows).map((row) => ({
+      agent: row.agentMatchedId
+        ? {
+            avatar: row.agentAvatar,
+            backgroundColor: row.agentBackgroundColor,
+            title: row.agentTitle,
+          }
+        : null,
       agentId: row.agentId,
       createdAt: row.createdAt,
       description: this.truncate(row.content),
