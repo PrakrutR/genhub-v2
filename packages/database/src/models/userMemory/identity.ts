@@ -1,13 +1,12 @@
 import type { IdentityListParams, IdentityListResult } from '@lobechat/types';
 import { RelationshipEnum } from '@lobechat/types';
 import type { SQL } from 'drizzle-orm';
-import { and, asc, desc, eq, ilike, inArray, isNull, or, sql } from 'drizzle-orm';
+import { and, asc, desc, eq, inArray, isNull, or, sql } from 'drizzle-orm';
 
 import type { NewUserMemoryIdentity, UserMemoryIdentity } from '../../schemas';
 import { userMemories, userMemoriesIdentities } from '../../schemas';
 import type { LobeChatDatabase } from '../../type';
-import { SAFE_BM25_QUERY_OPTIONS, sanitizeBm25Query, sanitizeIlikeQuery } from '../../utils/bm25';
-import { isPgSearchAvailable } from '../../utils/pgSearch';
+import { normalizeBm25MatchQuery, SAFE_BM25_QUERY_OPTIONS } from '../../utils/bm25';
 
 export class UserMemoryIdentityModel {
   private userId: string;
@@ -76,24 +75,16 @@ export class UserMemoryIdentityModel {
     const normalizedPageSize = Math.min(Math.max(pageSize, 1), 100);
     const offset = (normalizedPage - 1) * normalizedPageSize;
     const normalizedQuery = typeof q === 'string' ? q.trim() : '';
-    const useBm25 = normalizedQuery ? await isPgSearchAvailable(this.db) : true;
-    const bm25Query =
-      normalizedQuery && useBm25 ? sanitizeBm25Query(normalizedQuery, SAFE_BM25_QUERY_OPTIONS) : '';
-    const ilikePattern =
-      normalizedQuery && !useBm25 ? `%${sanitizeIlikeQuery(normalizedQuery)}%` : '';
+    const bm25MatchQuery = normalizedQuery
+      ? normalizeBm25MatchQuery(normalizedQuery, SAFE_BM25_QUERY_OPTIONS)
+      : '';
 
     // Build WHERE conditions
     const conditions: Array<SQL | undefined> = [
       eq(userMemoriesIdentities.userId, this.userId),
       // Full-text search across title, description, role
       normalizedQuery
-        ? useBm25
-          ? sql`(${userMemories.title} @@@ ${bm25Query} OR ${userMemoriesIdentities.description} @@@ ${bm25Query} OR ${userMemoriesIdentities.role} @@@ ${bm25Query})`
-          : or(
-              ilike(userMemories.title, ilikePattern),
-              ilike(userMemoriesIdentities.description, ilikePattern),
-              ilike(userMemoriesIdentities.role, ilikePattern),
-            )
+        ? sql`(${userMemories.id} @@@ paradedb.boolean(should => ARRAY[paradedb.match('title', ${bm25MatchQuery}, conjunction_mode => true)]) OR ${userMemoriesIdentities.id} @@@ paradedb.boolean(should => ARRAY[paradedb.match('description', ${bm25MatchQuery}, conjunction_mode => true), paradedb.match('role', ${bm25MatchQuery}, conjunction_mode => true)]))`
         : undefined,
       types && types.length > 0 ? inArray(userMemoriesIdentities.type, types) : undefined,
       // Default to 'self' relationship if not specified

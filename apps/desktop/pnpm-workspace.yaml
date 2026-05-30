@@ -1,6 +1,8 @@
 packages:
   - '../cli'
   - '../../packages/agent-gateway-client'
+  - '../../packages/chat-adapter-imessage'
+  - '../../packages/heterogeneous-agents'
   - '../../packages/const'
   - '../../packages/electron-server-ipc'
   - '../../packages/electron-client-ipc'

@@ -7,6 +7,7 @@ import {
   hasUserVisualFiles,
   LobeAgentIdentifier,
   normalizeAnalyzeVisualMediaInput,
+  PlanExecutionRuntime,
   selectVisualFileItems,
   validateVisualMediaUrls,
 } from '@lobechat/builtin-tool-lobe-agent';
@@ -14,13 +15,14 @@ import type { LobeChatDatabase } from '@lobechat/database';
 import type { ChatStreamPayload } from '@lobechat/model-runtime';
 import { consumeStreamUntilDone } from '@lobechat/model-runtime';
 import type { BuiltinServerRuntimeOutput } from '@lobechat/types';
-import { LOBE_DEFAULT_MODEL_LIST } from 'model-bank';
+import { RequestTrigger } from '@lobechat/types';
 
 import { MessageModel } from '@/database/models/message';
 import { toolsEnv } from '@/envs/tools';
 import { initModelRuntimeFromDB } from '@/server/modules/ModelRuntime';
 import { FileService } from '@/server/services/file';
 
+import { createServerPlanRuntimeService } from './lobeAgentPlan';
 import type { ServerRuntimeRegistration } from './types';
 
 interface AnalyzeVisualMediaParams {
@@ -45,10 +47,13 @@ const buildError = (content: string, code: string): BuiltinServerRuntimeOutput =
   success: false,
 });
 
-const getModelAbilities = (model: string, provider: string) => {
+const getModelAbilities = async (model: string, provider: string) => {
+  const { loadModels } = await import('@/business/client/model-bank/loadModels');
+  const builtinModels = await loadModels();
+
   return (
-    LOBE_DEFAULT_MODEL_LIST.find((item) => item.id === model && item.providerId === provider) ??
-    LOBE_DEFAULT_MODEL_LIST.find((item) => item.id === model)
+    builtinModels.find((item) => item.id === model && item.providerId === provider) ??
+    builtinModels.find((item) => item.id === model)
   )?.abilities;
 };
 
@@ -68,6 +73,7 @@ class LobeAgentExecutionRuntime {
   private messageId: string;
   private threadId?: string | null;
   private topicId?: string;
+  private planRuntime: PlanExecutionRuntime;
 
   constructor(context: LobeAgentRuntimeContext) {
     this.agentId = context.agentId;
@@ -77,12 +83,35 @@ class LobeAgentExecutionRuntime {
     this.threadId = context.threadId;
     this.topicId = context.topicId;
     this.userId = context.userId;
+    this.planRuntime = new PlanExecutionRuntime(
+      createServerPlanRuntimeService(context.serverDB, context.userId),
+    );
   }
+
+  // ==================== Plan / Todo (delegated to PlanExecutionRuntime) ====================
+
+  createPlan = (params: any) =>
+    this.planRuntime.createPlan(params, { messageId: this.messageId, topicId: this.topicId });
+
+  updatePlan = (params: any) =>
+    this.planRuntime.updatePlan(params, { messageId: this.messageId, topicId: this.topicId });
+
+  createTodos = (params: any) =>
+    this.planRuntime.createTodos(params, { messageId: this.messageId, topicId: this.topicId });
+
+  updateTodos = (params: any) =>
+    this.planRuntime.updateTodos(params, { messageId: this.messageId, topicId: this.topicId });
+
+  clearTodos = (params: any) =>
+    this.planRuntime.clearTodos(params, { messageId: this.messageId, topicId: this.topicId });
 
   private queryScopeMessages = (
     messageModel: MessageModel,
     sourceMessage: ServerVisualSourceMessage,
-    postProcessUrl: (path: string | null, file: { fileType: string }) => Promise<string>,
+    postProcessUrl: (
+      path: string | null,
+      file: { fileType: string; id?: string | null },
+    ) => Promise<string>,
   ) => {
     const topicId = this.topicId ?? sourceMessage.topicId ?? undefined;
     const threadId = sourceMessage.threadId ?? this.threadId ?? undefined;
@@ -152,7 +181,10 @@ class LobeAgentExecutionRuntime {
     if (requestedRefs.length > 0) {
       const fileService = new FileService(this.db, this.userId);
       const messageModel = new MessageModel(this.db, this.userId);
-      const postProcessUrl = (path: string | null) => fileService.getFullFileUrl(path);
+      const postProcessUrl = (
+        path: string | null,
+        file: { fileType: string; id?: string | null },
+      ) => fileService.getFileAccessUrl({ id: file.id, url: path });
       const [sourceMessage] = await messageModel.queryByIds([this.messageId], {
         postProcessUrl,
       });
@@ -206,7 +238,7 @@ class LobeAgentExecutionRuntime {
       return buildError('No visual files selected.', 'NO_VISUAL_FILES_SELECTED');
     }
 
-    const abilities = getModelAbilities(model, provider);
+    const abilities = await getModelAbilities(model, provider);
     const hasImages = selectedItems.some((item) => item.type === 'image');
     const hasVideos = selectedItems.some((item) => item.type === 'video');
 
@@ -243,12 +275,15 @@ class LobeAgentExecutionRuntime {
         onCompletion: (data) => {
           usage = data.usage;
         },
+        onContentPart: (part) => {
+          if (part.partType === 'text') content += part.content;
+        },
         onText: (text) => {
           content += text;
         },
       },
       metadata: {
-        trigger: 'lobe-agent.analyzeVisualMedia',
+        trigger: RequestTrigger.VisualAnalysis,
       },
     });
 
@@ -260,7 +295,7 @@ class LobeAgentExecutionRuntime {
         files: selectedItems.map(({ ref, id, type, name }) => ({ id, name, ref, type })),
         model,
         provider,
-        trigger: 'lobe-agent.analyzeVisualMedia',
+        trigger: RequestTrigger.VisualAnalysis,
         usage,
       },
       success: true,
