@@ -81,3 +81,11 @@ export function normalizeBm25MatchQuery(
 
   return terms.join(' ');
 }
+
+/**
+ * Escape special ILIKE pattern characters so user input cannot inject wildcards.
+ * Escapes backslash, percent, and underscore.
+ */
+export function sanitizeIlikeQuery(query: string): string {
+  return query.replaceAll(/[\\%_]/g, '\\$&');
+}
