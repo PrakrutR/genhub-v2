@@ -18,11 +18,6 @@ const vercelConfig = {
       'packages/database/migrations/**',
     ],
   },
-  // Disable optimizePackageImports on Vercel: analyzing thousands of exports in
-  // @icons-pack/react-simple-icons et al. pushes webpack past the available heap.
-  experimental: {
-    optimizePackageImports: [],
-  },
 };
 const nextConfig = defineConfig({
   ...(isVercel ? vercelConfig : {}),
