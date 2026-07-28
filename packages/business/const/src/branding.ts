@@ -10,10 +10,9 @@ export const BRANDING_LOGO_URL = '/logo.png';
 export const ORG_NAME = 'GenHub';
 
 export const BRANDING_URL = {
-  help: 'https://github.com/PrakrutR/genhub-v2/wiki',
-  privacy: 'https://policy.genhub.app',
-  terms: 'https://terms.genhub.app',
-  subscription: undefined,
+  help: undefined,
+  privacy: undefined,
+  subscription: 'https://app.lobehub.com/settings/plans',
   support: undefined,
 };
 
@@ -30,8 +29,9 @@ export const FILE_URL = {
 };
 
 export const BRANDING_EMAIL = {
-  business: 'contact@genhub.app',
-  support: 'support@genhub.app',
+  business: 'hello@lobehub.com',
+  replyTo: undefined,
+  support: 'support@lobehub.com',
 };
 
 export const BRANDING_PROVIDER = 'GenHub';

@@ -1,4 +1,4 @@
-import type { LobeAgentChatConfig, LobeAgentConfig } from '@lobechat/types';
+import type { LobeAgentAgencyConfig, LobeAgentChatConfig, LobeAgentConfig } from '@lobechat/types';
 
 import type { GroupSupervisorContext } from './agents/group-supervisor/type';
 
@@ -11,11 +11,13 @@ export const BUILTIN_AGENT_SLUGS = {
   groupSupervisor: 'group-supervisor',
   inbox: 'inbox',
   nightlyReview: 'nightly-review',
+  onboardingUnderstanding: 'onboarding-understanding',
   pageAgent: 'page-agent',
   selfFeedbackIntent: 'self-feedback-intent',
   selfReflection: 'self-reflection',
   skillManagement: 'skill-management',
   taskAgent: 'task-agent',
+  verifyAgent: 'verify-agent',
   webOnboarding: 'web-onboarding',
 } as const;
 
@@ -37,6 +39,9 @@ export interface BuiltinAgentPersistConfig {
  * Runtime Result - dynamically generated config, not persisted
  */
 export interface BuiltinAgentRuntimeResult {
+  /** Runtime agency configuration overrides */
+  agencyConfig?: Partial<LobeAgentAgencyConfig>;
+
   /** Runtime chat configuration overrides */
   chatConfig?: Partial<LobeAgentChatConfig>;
 
@@ -79,8 +84,7 @@ export interface RuntimeContext {
  * - Object: BuiltinAgentRuntimeResult (static config)
  */
 export type BuiltinAgentRuntimeConfig =
-  | ((ctx: RuntimeContext) => BuiltinAgentRuntimeResult)
-  | BuiltinAgentRuntimeResult;
+  ((ctx: RuntimeContext) => BuiltinAgentRuntimeResult) | BuiltinAgentRuntimeResult;
 
 /**
  * Builtin Agent Definition - complete definition with persist and runtime parts

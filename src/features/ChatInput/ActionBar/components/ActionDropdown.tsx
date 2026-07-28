@@ -33,7 +33,7 @@ import {
 import DebugNode from '@/components/DebugNode';
 import { useIsMobile } from '@/hooks/useIsMobile';
 
-const styles = createStaticStyles(({ css }) => ({
+const styles = createStaticStyles(({ css, cssVar }) => ({
   dropdownMenu: css`
     .ant-avatar {
       margin-inline-end: var(--ant-margin-xs);
@@ -41,6 +41,13 @@ const styles = createStaticStyles(({ css }) => ({
   `,
   trigger: css`
     outline: none;
+
+    /* Keyboard users still need a landmark for where Enter will land. */
+    &:focus-visible {
+      border-radius: ${cssVar.borderRadius};
+      outline: 2px solid ${cssVar.colorPrimary};
+      outline-offset: 2px;
+    }
   `,
 }));
 
@@ -67,8 +74,21 @@ const SubmenuScrollStyle = createGlobalStyle`
     overflow: hidden auto;
     overscroll-behavior: contain;
 
+    /* The popup is shrink-to-fit, so one long item title would otherwise widen
+       the whole submenu. Bound the container and let rows fill it — the
+       min-width:0 chain below turns the overflow into an ellipsis. */
+    max-width: min(90vw, 400px);
     max-height: min(50vh, 640px);
     padding-block-end: 4px;
+  }
+
+  /* The skill submenu (the one with the search header) has collapsible groups,
+     so shrink-to-fit makes it resize every time a group opens or closes —
+     measured 243px collapsed vs 400px expanded, the jump driven by whichever
+     title happens to be longest. Pin the width so the container stays put and
+     the rows ellipsize into it. */
+  [data-submenu] > [role='menu']:has(.lobe-skill-submenu-search) {
+    width: min(90vw, 400px);
   }
 
   /* base-ui menu-item internal containers are flex by default but don't set
@@ -93,6 +113,32 @@ const SubmenuScrollStyle = createGlobalStyle`
   [data-submenu] > [role='menu'] [role='group']:has([data-skill-activation-group]) > [role='presentation'] {
     padding-block: 0;
   }
+
+  /* The skill submenu is the only submenu that uses a header slot (the search
+     bar). renderDropdownMenuItems wraps it in DropdownMenuHeader's default
+     8px/12px padding — which can't be reached via props — leaving the borderless
+     search floating in a tall gap and indented past the rows below. Trim the
+     padding so the search sits snug against the divider and its icon lines up
+     with the 16px icon column shared by the menu rows. */
+  [data-submenu] > [role='menu'] > *:has(.lobe-skill-submenu-search) {
+    padding-block: 4px;
+    padding-inline: 4px;
+  }
+
+  /* Submenu triggers that opt into a custom trailing chevron (the Plus menu's
+     Skills / Web Search / Attachments rows mark their extra icon with .lobe-submenu-chevron)
+     render that chevron themselves; hide base-ui's default triangle submenu arrow
+     — always the last child of the trigger's content — so the two don't stack. */
+  .lobe-submenu-chevron {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    line-height: 1;
+  }
+
+  [role='menuitem']:has(.lobe-submenu-chevron) > * > *:last-child {
+    display: none;
+  }
 `;
 
 export type ActionDropdownMenuItem = MenuItemType;
@@ -104,11 +150,35 @@ export type ActionDropdownMenuItem = MenuItemType;
  */
 export type ActionDropdownMenuItems = BaseMenuItemType[];
 
+interface MenuItemsHostProps {
+  close: () => void;
+  decorate: (items: ActionDropdownMenuItems) => ActionDropdownMenuItems;
+  useItems: (ctx: { close: () => void }) => ActionDropdownMenuItems;
+}
+
+/**
+ * Rendered inside the popup, which Base UI only mounts while the menu is open —
+ * so `useItems` and everything it subscribes to stays off the trigger's mount path.
+ */
+const MenuItemsHost = memo<MenuItemsHostProps>(({ close, decorate, useItems }) => {
+  const items = useItems({ close });
+
+  return <>{renderDropdownMenuItems(decorate(items ?? []))}</>;
+});
+
+MenuItemsHost.displayName = 'ActionDropdownMenuItemsHost';
+
 type ActionDropdownMenu = Omit<
   Pick<MenuProps<ActionDropdownMenuItem>, 'className' | 'onClick' | 'style'>,
   'items'
 > & {
-  items: ActionDropdownMenuItems | (() => ActionDropdownMenuItems);
+  items?: ActionDropdownMenuItems | (() => ActionDropdownMenuItems);
+  /**
+   * Hook form of `items`, invoked from inside the popup so it only runs while the
+   * menu is open. Use this when building the items needs hooks (store subscriptions,
+   * SWR, local state) that would otherwise run on every mount of the trigger.
+   */
+  useItems?: (ctx: { close: () => void }) => ActionDropdownMenuItems;
 };
 
 export interface ActionDropdownProps extends Omit<DropdownMenuProps, 'items'> {
@@ -257,7 +327,13 @@ const ActionDropdown = memo<ActionDropdownProps>(
       [menu],
     );
 
+    const closePopup = useCallback(() => {
+      onOpenChange?.(false, { reason: 'item-press' } as never);
+      if (open === undefined) setUncontrolledOpen(false);
+    }, [onOpenChange, open]);
+
     const renderedItems = useMemo(() => {
+      if (menu.useItems) return null;
       if (!prefetch && !isOpen) return menuItemsRef.current;
       const sourceItems = typeof menu.items === 'function' ? menu.items() : menu.items;
       const nextItems = renderDropdownMenuItems(decorateMenuItems(sourceItems ?? []));
@@ -268,10 +344,16 @@ const ActionDropdown = memo<ActionDropdownProps>(
     }, [decorateMenuItems, isOpen, menu, prefetch]);
 
     const menuContent = useMemo(() => {
-      if (!popupRender) return renderedItems;
+      const body = menu.useItems ? (
+        <MenuItemsHost close={closePopup} decorate={decorateMenuItems} useItems={menu.useItems} />
+      ) : (
+        renderedItems
+      );
 
-      return popupRender(renderedItems ?? null);
-    }, [popupRender, renderedItems]);
+      if (!popupRender) return body;
+
+      return popupRender(body ?? null);
+    }, [closePopup, decorateMenuItems, menu.useItems, popupRender, renderedItems]);
 
     const resolvedPopupClassName = useMemo<DropdownMenuPopupProps['className']>(() => {
       const popupClassName = popupProps?.className;

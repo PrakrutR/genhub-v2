@@ -1,2 +1,10 @@
-export { FilePathDisplay } from './FilePathDisplay';
-export { ToolResultCard } from './ToolResultCard';
+export { AnimatedNumber } from './AnimatedNumber';
+export {
+  type FileChangeKind,
+  getFileLanguage,
+  getFileName,
+  KindDot,
+  LineStats,
+} from './FileChangeStats';
+export { FilePathDisplay, getFilePathDisplayInfo } from './FilePathDisplay';
+export { OptionCard, type OptionCardProps } from './OptionCard';

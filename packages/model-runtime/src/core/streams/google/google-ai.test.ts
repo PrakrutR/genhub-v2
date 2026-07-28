@@ -159,6 +159,46 @@ describe('GoogleGenerativeAIStream', () => {
       ]);
     });
 
+    it('should expose missing usage diagnostics when finishReason has no usageMetadata', async () => {
+      vi.spyOn(uuidModule, 'nanoid').mockReturnValueOnce('missingUsage');
+      const mockGoogleStream = new ReadableStream({
+        start(controller) {
+          controller.enqueue({
+            candidates: [
+              {
+                content: { parts: [{ text: '' }], role: 'model' },
+                finishReason: 'STOP',
+                index: 0,
+              },
+            ],
+            modelVersion: 'gemini-test',
+          } as unknown as GenerateContentResponse);
+          controller.close();
+        },
+      });
+      const onFinal = vi.fn();
+
+      const protocolStream = GoogleGenerativeAIStream(mockGoogleStream, {
+        callbacks: { onFinal },
+        payload: { model: 'gemini-3.1-flash-lite', provider: 'google' },
+      });
+
+      await decodeStreamChunks(protocolStream);
+
+      expect(onFinal).toHaveBeenCalledWith(
+        expect.objectContaining({
+          usageMissingDiagnostics: {
+            finishReason: 'STOP',
+            hasUsageMetadata: false,
+            model: 'gemini-3.1-flash-lite',
+            provider: 'google',
+            source: 'google_generative_ai',
+            terminalEventType: 'GenerateContentResponse.candidates.finishReason',
+          },
+        }),
+      );
+    });
+
     it('should return undefined data without text', async () => {
       vi.spyOn(uuidModule, 'nanoid').mockReturnValueOnce('1');
 
@@ -1129,6 +1169,7 @@ describe('GoogleGenerativeAIStream', () => {
                 parts: [
                   {
                     functionCall: {
+                      id: 'call_search_1',
                       name: 'grep____searchGitHub____mcp',
                       args: {
                         query: '"version":',
@@ -1191,7 +1232,7 @@ describe('GoogleGenerativeAIStream', () => {
         [
           'id: chat_1',
           'event: tool_calls',
-          'data: [{"function":{"arguments":"{\\"query\\":\\"\\\\\\"version\\\\\\":\\",\\"repo\\":\\"lobehub/lobe-chat\\",\\"path\\":\\"package.json\\"}","name":"grep____searchGitHub____mcp"},"id":"grep____searchGitHub____mcp_0_abcd1234","index":0,"thoughtSignature":"123","type":"function"}]\n',
+          'data: [{"function":{"arguments":"{\\"query\\":\\"\\\\\\"version\\\\\\":\\",\\"repo\\":\\"lobehub/lobe-chat\\",\\"path\\":\\"package.json\\"}","name":"grep____searchGitHub____mcp"},"id":"call_search_1","index":0,"thoughtSignature":"123","type":"function"}]\n',
 
           'id: chat_1',
           'event: stop',

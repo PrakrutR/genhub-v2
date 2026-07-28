@@ -1,13 +1,16 @@
 'use client';
 
 import { MARKDOWN_MIME_TYPES } from '@lobechat/const';
-import { type CSSProperties } from 'react';
+import type { CSSProperties } from 'react';
 import { memo } from 'react';
 
+import { isHtmlFile } from '@/components/HtmlPreview';
 import { type FileListItem } from '@/types/files';
 
+import { isPdfFile } from './fileType';
 import NotSupport from './NotSupport';
 import CodeViewer from './Renderer/Code';
+import HTMLViewer from './Renderer/HTML';
 import ImageViewer from './Renderer/Image';
 import MSDocViewer from './Renderer/MSDoc';
 import PDFViewer from './Renderer/PDF';
@@ -204,6 +207,8 @@ const ARCHIVE_MIME_TYPES = new Set([
 ]);
 
 // Helper function to check file type
+// Note: fileType is matched exactly against the MIME set; substring matching would let
+// generic values like `custom/document` bleed into MSDoc via the `doc` substring.
 const matchesFileType = (
   fileType: string | undefined,
   fileName: string | undefined,
@@ -213,17 +218,10 @@ const matchesFileType = (
   const lowerFileType = fileType?.toLowerCase();
   const lowerFileName = fileName?.toLowerCase();
 
-  // Check MIME type
   if (lowerFileType && mimeTypes.has(lowerFileType)) {
     return true;
   }
 
-  // Check file extension in fileType
-  if (lowerFileType && extensions.some((ext) => lowerFileType.includes(ext.slice(1)))) {
-    return true;
-  }
-
-  // Check file extension in fileName
   if (lowerFileName && extensions.some((ext) => lowerFileName.endsWith(ext))) {
     return true;
   }
@@ -241,7 +239,7 @@ interface FileViewerProps extends FileListItem {
  */
 const FileViewer = memo<FileViewerProps>(({ id, style, fileType, url, name }) => {
   // PDF files
-  if (fileType?.toLowerCase() === 'pdf' || name?.toLowerCase().endsWith('.pdf')) {
+  if (isPdfFile({ fileName: name, fileType, path: url })) {
     return <PDFViewer fileId={id} url={url} />;
   }
 
@@ -265,6 +263,11 @@ const FileViewer = memo<FileViewerProps>(({ id, style, fileType, url, name }) =>
   // (e.g., 'doc' contains 'c' which would match CODE_EXTENSIONS)
   if (matchesFileType(fileType, name, MSDOC_EXTENSIONS, MSDOC_MIME_TYPES)) {
     return <MSDocViewer fileId={id} url={url} />;
+  }
+
+  // HTML files should render as a sandboxed preview before the broader code-file fallback.
+  if (isHtmlFile({ fileName: name, fileType })) {
+    return <HTMLViewer fileId={id} url={url} />;
   }
 
   // Code files (JavaScript, TypeScript, Python, Java, C++, Go, Rust, Markdown, etc.)

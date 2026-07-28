@@ -1,0 +1,265 @@
+/**
+ * @vitest-environment happy-dom
+ */
+import { render, screen } from '@testing-library/react';
+import type { ReactNode } from 'react';
+import { afterEach, beforeAll, beforeEach, describe, expect, it, vi } from 'vitest';
+
+import { setDevDockUnlocked } from '@/utils/devDockUnlock';
+
+import type SPAGlobalProviderComponent from './index';
+import { type DevDockLayout as DevDockLayoutComponent } from './index';
+
+let SPAGlobalProvider: typeof SPAGlobalProviderComponent;
+let DevDockLayout: typeof DevDockLayoutComponent;
+const { canAccessDevDock } = vi.hoisted(() => ({
+  canAccessDevDock: vi.fn(() => false),
+}));
+
+vi.mock('@lobehub/ui', async () => {
+  const React = await import('react');
+  const Passthrough = ({ children }: { children?: ReactNode }) =>
+    React.createElement(React.Fragment, null, children);
+
+  return {
+    ContextMenuHost: () => React.createElement('div', { 'data-testid': 'context-menu-host' }),
+    ModalHost: () => React.createElement('div', { 'data-testid': 'legacy-modal-host' }),
+    TooltipGroup: Passthrough,
+  };
+});
+
+vi.mock('@lobehub/ui/base-ui', async () => {
+  const React = await import('react');
+
+  return {
+    ModalHost: () => React.createElement('div', { 'data-testid': 'base-modal-host' }),
+    ToastHost: () => React.createElement('div', { 'data-testid': 'toast-host' }),
+  };
+});
+
+vi.mock('antd-style', async () => {
+  const React = await import('react');
+
+  return {
+    StyleProvider: ({ children }: { children?: ReactNode }) =>
+      React.createElement(React.Fragment, null, children),
+  };
+});
+
+vi.mock('motion/react', async () => {
+  const React = await import('react');
+
+  return {
+    LazyMotion: ({ children }: { children?: ReactNode }) =>
+      React.createElement(React.Fragment, null, children),
+    domMax: {},
+  };
+});
+
+vi.mock('@/components/Analytics/LobeAnalyticsProviderWrapper', async () => {
+  const React = await import('react');
+
+  return {
+    LobeAnalyticsProviderWrapper: ({ children }: { children?: ReactNode }) =>
+      React.createElement(React.Fragment, null, children),
+  };
+});
+
+vi.mock('@/components/DragUploadZone/DragUploadProvider', async () => {
+  const React = await import('react');
+
+  return {
+    DragUploadProvider: ({ children }: { children?: ReactNode }) =>
+      React.createElement(React.Fragment, null, children),
+  };
+});
+
+vi.mock('@/const/version', () => ({
+  isDesktop: false,
+}));
+
+vi.mock('@/features/DevDock', async () => {
+  const React = await import('react');
+
+  return {
+    default: () => React.createElement('div', { 'data-testid': 'dev-dock' }),
+  };
+});
+
+vi.mock('@/layout/AuthProvider', async () => {
+  const React = await import('react');
+
+  return {
+    default: ({ children }: { children?: ReactNode }) =>
+      React.createElement(React.Fragment, null, children),
+  };
+});
+
+vi.mock('@/layout/AuthProvider/MarketAuth', async () => {
+  const React = await import('react');
+
+  return {
+    MarketAuthProvider: ({ children }: { children?: ReactNode }) =>
+      React.createElement('div', { 'data-testid': 'market-auth-provider' }, children),
+  };
+});
+
+vi.mock('@/layout/GlobalProvider/AppTheme', async () => {
+  const React = await import('react');
+
+  return {
+    default: ({ children }: { children?: ReactNode }) =>
+      React.createElement(React.Fragment, null, children),
+  };
+});
+
+vi.mock('@/layout/GlobalProvider/CacheHydrationGate', async () => {
+  const React = await import('react');
+
+  return {
+    default: ({ children }: { children?: ReactNode }) =>
+      React.createElement(React.Fragment, null, children),
+  };
+});
+
+vi.mock('@/layout/GlobalProvider/DynamicFavicon', () => ({
+  default: () => null,
+}));
+
+vi.mock('@/layout/GlobalProvider/FaviconProvider', async () => {
+  const React = await import('react');
+
+  return {
+    FaviconProvider: ({ children }: { children?: ReactNode }) =>
+      React.createElement(React.Fragment, null, children),
+  };
+});
+
+vi.mock('@/layout/GlobalProvider/GroupWizardProvider', async () => {
+  const React = await import('react');
+
+  return {
+    GroupWizardProvider: ({ children }: { children?: ReactNode }) =>
+      React.createElement(React.Fragment, null, children),
+  };
+});
+
+vi.mock('@/layout/GlobalProvider/Query', async () => {
+  const React = await import('react');
+
+  return {
+    default: ({ children }: { children?: ReactNode }) =>
+      React.createElement(React.Fragment, null, children),
+  };
+});
+
+vi.mock('@/layout/GlobalProvider/ServerVersionOutdatedAlert', () => ({
+  default: () => null,
+}));
+
+vi.mock('@/layout/GlobalProvider/StoreInitialization', () => ({
+  default: () => null,
+}));
+
+vi.mock('@/store/serverConfig/Provider', async () => {
+  const React = await import('react');
+
+  return {
+    ServerConfigStoreProvider: ({ children }: { children?: ReactNode }) =>
+      React.createElement(React.Fragment, null, children),
+  };
+});
+
+vi.mock('@/store/serverConfig', () => ({
+  useServerConfigStore: (selector: (state: { canAccessDevDock: boolean }) => unknown) =>
+    selector({ canAccessDevDock: canAccessDevDock() }),
+}));
+
+vi.mock('./Locale', async () => {
+  const React = await import('react');
+
+  return {
+    default: ({ children }: { children?: ReactNode }) =>
+      React.createElement(React.Fragment, null, children),
+  };
+});
+
+describe('SPAGlobalProvider', () => {
+  beforeAll(async () => {
+    const loadedModule = await import('./index');
+    SPAGlobalProvider = loadedModule.default;
+    DevDockLayout = loadedModule.DevDockLayout;
+  });
+
+  beforeEach(() => {
+    canAccessDevDock.mockReturnValue(false);
+    setDevDockUnlocked(false);
+    Reflect.deleteProperty(window, '__SERVER_CONFIG__');
+  });
+
+  afterEach(() => {
+    vi.unstubAllEnvs();
+  });
+
+  it('provides Market auth from the SPA global provider', () => {
+    render(
+      <SPAGlobalProvider>
+        <div data-testid="spa-route-content" />
+      </SPAGlobalProvider>,
+    );
+
+    const routeContent = screen.getByTestId('spa-route-content');
+
+    expect(routeContent.closest('[data-testid="market-auth-provider"]')).not.toBeNull();
+  });
+
+  it('mounts DevDock in dev builds even without server-resolved access', async () => {
+    render(
+      <DevDockLayout>
+        <div data-testid="spa-route-content" />
+      </DevDockLayout>,
+    );
+
+    expect(await screen.findByTestId('dev-dock')).toBeInTheDocument();
+  });
+
+  it('does not mount DevDock in production without an unlock', () => {
+    vi.stubEnv('PROD', true);
+    canAccessDevDock.mockReturnValue(true);
+
+    render(
+      <DevDockLayout>
+        <div data-testid="spa-route-content" />
+      </DevDockLayout>,
+    );
+
+    expect(screen.queryByTestId('dev-dock')).toBeNull();
+  });
+
+  it('does not mount DevDock in production without server access', () => {
+    vi.stubEnv('PROD', true);
+    setDevDockUnlocked(true);
+
+    render(
+      <DevDockLayout>
+        <div data-testid="spa-route-content" />
+      </DevDockLayout>,
+    );
+
+    expect(screen.queryByTestId('dev-dock')).toBeNull();
+  });
+
+  it('mounts DevDock in production with server access and an unlock', async () => {
+    vi.stubEnv('PROD', true);
+    canAccessDevDock.mockReturnValue(true);
+    setDevDockUnlocked(true);
+
+    render(
+      <DevDockLayout>
+        <div data-testid="spa-route-content" />
+      </DevDockLayout>,
+    );
+
+    expect(await screen.findByTestId('dev-dock')).toBeInTheDocument();
+  });
+});

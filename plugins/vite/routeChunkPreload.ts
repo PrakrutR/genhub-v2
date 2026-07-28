@@ -248,6 +248,12 @@ const isI18nChunkFileName = (fileName: string) => {
   return normalized.startsWith('i18n/') || basename.startsWith('i18n-');
 };
 
+const isDevtoolsChunkFileName = (fileName: string) => {
+  const normalized = normalizePath(fileName);
+
+  return normalized.includes('/devtools/') || normalized.startsWith('devtools/');
+};
+
 const syntaxHighlightModulePatterns = [
   '/node_modules/@shikijs/',
   '/node_modules/shiki/',
@@ -286,7 +292,11 @@ function isDeferredRendererChunk(chunk: OutputChunkLike) {
 }
 
 function isPrewarmExcludedChunk(chunk: OutputChunkLike) {
-  return isI18nChunkFileName(chunk.fileName) || isDeferredRendererChunk(chunk);
+  return (
+    isI18nChunkFileName(chunk.fileName) ||
+    isDevtoolsChunkFileName(chunk.fileName) ||
+    isDeferredRendererChunk(chunk)
+  );
 }
 
 const stripModuleSuffix = (value: string) =>
@@ -557,6 +567,8 @@ export function routeChunkPreload(options: RouteChunkPreloadOptions = {}): Plugi
       order: 'post',
       handler(html, ctx) {
         if (!config || !ctx.bundle) return html;
+        // The auth SPA shares the build but must not preload main-app routes
+        if (ctx.path?.includes('index.auth')) return html;
 
         const outputBundle = ctx.bundle as OutputBundleLike;
         const manifest = createRoutePreloadManifest(outputBundle, config.root, groups);

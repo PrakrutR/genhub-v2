@@ -20,6 +20,7 @@ import { messageGroups, messages, messagesFiles, messageTranslates } from './mes
 import { chunks, documentChunks, unstructuredChunks } from './rag';
 import { sessionGroups, sessions } from './session';
 import { threads, topicDocuments, topics } from './topic';
+import { topicCommentMentions, topicComments } from './topicComment';
 import { users } from './user';
 import { workspaces } from './workspace';
 
@@ -63,9 +64,9 @@ export const filesToSessions = pgTable(
   (t) => ({
     pk: primaryKey({ columns: [t.fileId, t.sessionId] }),
     userIdIdx: index('files_to_sessions_user_id_idx').on(t.userId),
+    workspaceIdIdx: index('files_to_sessions_workspace_id_idx').on(t.workspaceId),
     fileIdIdx: index('files_to_sessions_file_id_idx').on(t.fileId),
     sessionIdIdx: index('files_to_sessions_session_id_idx').on(t.sessionId),
-    workspaceIdIdx: index('files_to_sessions_workspace_id_idx').on(t.workspaceId),
   }),
 );
 
@@ -83,9 +84,9 @@ export const fileChunks = pgTable(
   (t) => ({
     pk: primaryKey({ columns: [t.fileId, t.chunkId] }),
     userIdIdx: index('file_chunks_user_id_idx').on(t.userId),
+    workspaceIdIdx: index('file_chunks_workspace_id_idx').on(t.workspaceId),
     fileIdIdx: index('file_chunks_file_id_idx').on(t.fileId),
     chunkIdIdx: index('file_chunks_chunk_id_idx').on(t.chunkId),
-    workspaceIdIdx: index('file_chunks_workspace_id_idx').on(t.workspaceId),
   }),
 );
 export type NewFileChunkItem = typeof fileChunks.$inferInsert;
@@ -96,6 +97,38 @@ export const topicRelations = relations(topics, ({ one, many }) => ({
     references: [sessions.id],
   }),
   documents: many(topicDocuments),
+  comments: many(topicComments),
+}));
+
+export const topicCommentsRelations = relations(topicComments, ({ one, many }) => ({
+  topic: one(topics, {
+    fields: [topicComments.topicId],
+    references: [topics.id],
+  }),
+  message: one(messages, {
+    fields: [topicComments.messageId],
+    references: [messages.id],
+  }),
+  author: one(users, {
+    fields: [topicComments.authorUserId],
+    references: [users.id],
+  }),
+  workspace: one(workspaces, {
+    fields: [topicComments.workspaceId],
+    references: [workspaces.id],
+  }),
+  mentions: many(topicCommentMentions),
+}));
+
+export const topicCommentMentionsRelations = relations(topicCommentMentions, ({ one }) => ({
+  comment: one(topicComments, {
+    fields: [topicCommentMentions.commentId],
+    references: [topicComments.id],
+  }),
+  mentionedUser: one(users, {
+    fields: [topicCommentMentions.mentionedUserId],
+    references: [users.id],
+  }),
 }));
 
 export const threadsRelations = relations(threads, ({ one }) => ({

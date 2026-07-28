@@ -2,7 +2,7 @@ import { type ItemType } from '@lobehub/ui';
 import { Icon } from '@lobehub/ui';
 import { createStaticStyles, cssVar, cx } from 'antd-style';
 import isEqual from 'fast-deep-equal';
-import { ArrowRight, LibraryBig } from 'lucide-react';
+import { LibraryBig } from 'lucide-react';
 import type { ReactNode } from 'react';
 import { useTranslation } from 'react-i18next';
 
@@ -24,7 +24,7 @@ const styles = createStaticStyles(({ css }) => ({
     cursor: pointer;
 
     display: flex;
-    gap: 8px;
+    gap: 12px;
     align-items: center;
 
     /* width 320 + margin-inline -12 anchors the submenu to 320px (matching the skill
@@ -92,6 +92,7 @@ export const useControls = ({
     label: (
       <CheckboxItem
         checked={item.enabled}
+        hasPadding={false}
         id={item.id}
         label={item.name}
         labelMaxWidth={labelMaxWidth}
@@ -108,6 +109,7 @@ export const useControls = ({
     label: (
       <CheckboxItem
         checked={item.enabled}
+        hasPadding={false}
         id={item.id}
         label={item.name}
         labelMaxWidth={labelMaxWidth}
@@ -125,20 +127,20 @@ export const useControls = ({
     ...fileItems,
   ];
 
-  const footer = (
-    <button
-      className={cx(styles.viewMore)}
-      type="button"
-      onClick={(event) => {
-        event.stopPropagation();
-        openAttachKnowledgeModal();
-      }}
-    >
-      <Icon icon={LibraryBig} size={16} />
-      <span className={cx(styles.viewMoreLabel)}>{t('knowledgeBase.viewMore')}</span>
-      <Icon icon={ArrowRight} size={16} />
-    </button>
-  );
+  const footer =
+    relatedGroups.length > 0 ? (
+      <button
+        className={cx(styles.viewMore)}
+        type="button"
+        onClick={(event) => {
+          event.stopPropagation();
+          openAttachKnowledgeModal();
+        }}
+      >
+        <Icon color={cssVar.colorTextSecondary} icon={LibraryBig} size={14} />
+        <span className={cx(styles.viewMoreLabel)}>{t('knowledgeBase.viewMore')}</span>
+      </button>
+    ) : null;
 
   return { enabledCount, footer, items: relatedGroups } satisfies KnowledgeControls;
 };

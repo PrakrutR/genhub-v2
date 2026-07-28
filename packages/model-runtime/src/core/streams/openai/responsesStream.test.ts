@@ -709,6 +709,34 @@ describe('OpenAIResponsesStream', () => {
     expect(chunks).toMatchSnapshot();
   });
 
+  it('should emit encrypted reasoning content as a reasoning signature', async () => {
+    const mockOpenAIStream = createReadableStream([
+      {
+        type: 'response.created',
+        response: {
+          id: 'resp_reasoning_signature',
+          status: 'in_progress',
+        },
+      },
+      {
+        type: 'response.output_item.done',
+        output_index: 0,
+        item: {
+          encrypted_content: 'encrypted-reasoning-content',
+          id: 'reasoning_item',
+          summary: [],
+          type: 'reasoning',
+        },
+      },
+    ]);
+
+    const protocolStream = OpenAIResponsesStream(mockOpenAIStream);
+    const chunks = await readStreamChunk(protocolStream);
+
+    expect(chunks.some((chunk) => chunk.includes('event: reasoning_signature'))).toBe(true);
+    expect(chunks.some((chunk) => chunk.includes('encrypted-reasoning-content'))).toBe(true);
+  });
+
   it('should handle response.completed with usage', async () => {
     const mockOpenAIStream = createReadableStream([
       {
@@ -742,6 +770,7 @@ describe('OpenAIResponsesStream', () => {
   });
 
   it('should handle response.completed without usage', async () => {
+    const onFinal = vi.fn();
     const mockOpenAIStream = createReadableStream([
       {
         type: 'response.created',
@@ -759,10 +788,28 @@ describe('OpenAIResponsesStream', () => {
       },
     ]);
 
-    const protocolStream = OpenAIResponsesStream(mockOpenAIStream);
+    const protocolStream = OpenAIResponsesStream(mockOpenAIStream, {
+      callbacks: { onFinal },
+      payload: { apiMode: 'responses', model: 'gpt-5.4-mini', provider: 'openai' },
+    });
     const chunks = await readStreamChunk(protocolStream);
 
     expect(chunks).toMatchSnapshot();
+    expect(onFinal).toHaveBeenCalledWith(
+      expect.objectContaining({
+        usageMissingDiagnostics: {
+          apiMode: 'responses',
+          hasUsageMetadata: false,
+          includeUsageRequested: undefined,
+          model: 'gpt-5.4-mini',
+          provider: 'openai',
+          responseId: 'resp_completed_no_usage',
+          source: 'openai_responses',
+          terminalEventType: 'response.completed',
+          terminalStatus: 'completed',
+        },
+      }),
+    );
   });
 
   it('should handle unknown chunk type as data', async () => {

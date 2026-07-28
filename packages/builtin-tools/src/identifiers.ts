@@ -8,13 +8,16 @@ import {
   agentSignalReviewManifest,
   agentSignalSkillManagementManifest,
 } from '@lobechat/builtin-tool-agent-signal';
+import { BrowserManifest } from '@lobechat/builtin-tool-browser';
 import { CalculatorManifest } from '@lobechat/builtin-tool-calculator';
 import { CloudSandboxManifest } from '@lobechat/builtin-tool-cloud-sandbox';
 import { CredsManifest } from '@lobechat/builtin-tool-creds';
 import { GroupAgentBuilderManifest } from '@lobechat/builtin-tool-group-agent-builder';
 import { GroupManagementManifest } from '@lobechat/builtin-tool-group-management';
+import { ImageGenerationManifest } from '@lobechat/builtin-tool-image-generation';
 import { KnowledgeBaseManifest } from '@lobechat/builtin-tool-knowledge-base';
 import { LobeAgentManifest } from '@lobechat/builtin-tool-lobe-agent';
+import { LobeDeliveryCheckerManifest } from '@lobechat/builtin-tool-lobe-delivery-checker';
 import { LocalSystemManifest } from '@lobechat/builtin-tool-local-system';
 import { MemoryManifest } from '@lobechat/builtin-tool-memory';
 import { NotebookManifest } from '@lobechat/builtin-tool-notebook';
@@ -24,6 +27,7 @@ import { SkillStoreManifest } from '@lobechat/builtin-tool-skill-store';
 import { SkillsManifest } from '@lobechat/builtin-tool-skills';
 import { TopicReferenceManifest } from '@lobechat/builtin-tool-topic-reference';
 import { UserInteractionManifest } from '@lobechat/builtin-tool-user-interaction';
+import { VerifyToolManifest } from '@lobechat/builtin-tool-verify';
 import { WebBrowsingManifest } from '@lobechat/builtin-tool-web-browsing';
 import { WebOnboardingManifest } from '@lobechat/builtin-tool-web-onboarding';
 
@@ -36,7 +40,9 @@ export const builtinToolIdentifiers: string[] = [
   CredsManifest.identifier,
   GroupAgentBuilderManifest.identifier,
   GroupManagementManifest.identifier,
+  ImageGenerationManifest.identifier,
   KnowledgeBaseManifest.identifier,
+  BrowserManifest.identifier,
   LocalSystemManifest.identifier,
   MemoryManifest.identifier,
   NotebookManifest.identifier,
@@ -54,4 +60,6 @@ export const builtinToolIdentifiers: string[] = [
   UserInteractionManifest.identifier,
   LobeAgentManifest.identifier,
   WebOnboardingManifest.identifier,
+  VerifyToolManifest.identifier,
+  LobeDeliveryCheckerManifest.identifier,
 ];

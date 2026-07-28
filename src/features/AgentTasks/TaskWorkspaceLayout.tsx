@@ -2,10 +2,11 @@
 
 import { Flexbox } from '@lobehub/ui';
 import { memo, useLayoutEffect } from 'react';
-import { Outlet } from 'react-router-dom';
+import { Outlet } from 'react-router';
 
 import AgentTaskManager from '@/features/AgentTaskManager';
 import { resetNavPanel } from '@/features/NavPanel';
+import MobilePortal from '@/features/Portal/Mobile';
 import { useIsMobile } from '@/hooks/useIsMobile';
 
 const TaskWorkspaceLayout = memo(() => {
@@ -20,7 +21,7 @@ const TaskWorkspaceLayout = memo(() => {
       <Flexbox flex={1} style={{ minWidth: 0 }}>
         <Outlet />
       </Flexbox>
-      {!isMobile && <AgentTaskManager />}
+      {isMobile ? <MobilePortal /> : <AgentTaskManager />}
     </Flexbox>
   );
 });

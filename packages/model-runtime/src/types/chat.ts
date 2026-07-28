@@ -1,5 +1,11 @@
-import type { ModelPerformance, ModelTokensUsage, ModelUsage } from '@lobechat/types';
+import type {
+  ModelPerformance,
+  ModelReasoning,
+  ModelTokensUsage,
+  ModelUsage,
+} from '@lobechat/types';
 
+import type { ModelPricingContext } from './pricing';
 import type { MessageToolCall, MessageToolCallChunk } from './toolsCalling';
 
 export type LLMRoleType = 'user' | 'system' | 'assistant' | 'function' | 'tool';
@@ -37,20 +43,29 @@ interface UserMessageContentPartVideo {
   type: 'video_url';
   video_url: { url: string };
 }
+interface UserMessageContentPartAudio {
+  audio_url: { url: string };
+  type: 'audio_url';
+}
 
 export type UserMessageContentPart =
   | UserMessageContentPartText
   | UserMessageContentPartImage
   | UserMessageContentPartVideo
+  | UserMessageContentPartAudio
   | UserMessageContentPartThinking;
 
 export interface OpenAIChatMessage {
   content: string | UserMessageContentPart[];
+  model?: string;
   name?: string;
+  provider?: string;
   reasoning?: {
     content?: string;
     duration?: number;
+    signature?: string;
   };
+  reasoning_content?: string;
   role: LLMRoleType;
   tool_call_id?: string;
   tool_calls?: MessageToolCall[];
@@ -123,9 +138,11 @@ export interface ChatStreamPayload {
    * @default 0
    */
   presence_penalty?: number;
+  preserveThinking?: boolean;
   provider?: string;
   reasoning?: {
     effort?: string;
+    mode?: 'standard' | 'pro';
     summary?: string;
   };
   reasoning_effort?: 'none' | 'minimal' | 'low' | 'medium' | 'high' | 'xhigh' | 'max';
@@ -149,6 +166,14 @@ export interface ChatStreamPayload {
    */
   thinking?: {
     budget_tokens?: number;
+    /**
+     * Controls whether the summarized reasoning text is returned. Defaults to `omitted` on
+     * Claude Fable 5 / Opus 5 / Sonnet 5 / Opus 4.8 / Opus 4.7, where thinking blocks then
+     * arrive with an empty `thinking` field and no `thinking_delta` events while streaming.
+     * Invalid together with `type: 'disabled'`.
+     * @see https://platform.claude.com/docs/en/build-with-claude/thinking#controlling-thinking-display
+     */
+    display?: 'omitted' | 'summarized';
     type?: 'enabled' | 'disabled' | 'adaptive';
   };
   thinkingBudget?: number;
@@ -180,6 +205,8 @@ export interface ChatMethodOptions {
   headers?: Record<string, any>;
   /** Metadata passed to hooks (billing, tracing, etc.) */
   metadata?: Record<string, unknown>;
+  /** Request-scoped pricing context for model-bank pricing lookups. */
+  pricingContext?: ModelPricingContext;
   /**
    * send the request to the ai api endpoint
    */
@@ -233,11 +260,28 @@ export interface OnFinishData {
    */
   finishReason?: string;
   grounding?: any;
+  reasoning?: ModelReasoning;
   speed?: ModelPerformance;
   text: string;
   thinking?: string;
   toolsCalling?: MessageToolCall[];
   usage?: ModelUsage;
+  usageMissingDiagnostics?: UsageMissingDiagnostics;
+}
+
+export interface UsageMissingDiagnostics {
+  apiMode?: 'chat_completions' | 'messages' | 'responses';
+  chunkIndex?: number;
+  finishReason?: string | null;
+  hasUsageMetadata: boolean;
+  includeUsageRequested?: boolean;
+  model?: string;
+  provider?: string;
+  responseId?: string;
+  source:
+    'anthropic_messages' | 'google_generative_ai' | 'openai_chat_completions' | 'openai_responses';
+  terminalEventType: string;
+  terminalStatus?: string;
 }
 
 /**
